@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/diyorbeknematov/lms/internal/config"
@@ -43,7 +45,6 @@ func New(cfg config.DBConfig) (*Postgres, error) {
 		pool.Close()
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
-	
 
 	return &Postgres{
 		Pool: pool,
@@ -52,4 +53,10 @@ func New(cfg config.DBConfig) (*Postgres, error) {
 
 func (p *Postgres) Close() {
 	p.Pool.Close()
+}
+
+type DBTX interface {
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 }

@@ -8,6 +8,12 @@ CREATE TABLE roles (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
+INSERT INTO roles (id, name)
+VALUES
+    (gen_random_uuid(), 'SuperAdmin'),
+    (gen_random_uuid(), 'Instructor'),
+    (gen_random_uuid(), 'Student');
+
 CREATE TABLE users (
     id UUID PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
