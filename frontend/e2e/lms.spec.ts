@@ -99,8 +99,12 @@ test.describe('the instructor builds the course', () => {
     await teacher.getByLabel('Level').selectOption('beginner')
     await teacher.getByLabel('Price (USD, 0 is free)').fill('25')
     await teacher.getByLabel('Duration (minutes)').fill('90')
-    await teacher.getByLabel('What students learn').fill('Write Go programs\nUse goroutines')
+    await teacher.getByLabel('What students learn').fill('Write Go programs')
+    await teacher.getByLabel('What students learn').press('Enter')
+    await teacher.getByLabel('What students learn').fill('Use goroutines')
+    await teacher.getByLabel('What students learn').press('Enter')
     await teacher.getByLabel('Requirements').fill('A laptop')
+    await teacher.getByLabel('Requirements').press('Enter')
     await teacher.locator('#upload-course_cover').setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: png })
     await expect(teacher.locator('img[src^="blob:"]').first()).toBeVisible()
 

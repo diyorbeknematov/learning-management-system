@@ -1,19 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, call } from '@/api/client'
+import type { components } from '@/api/schema'
 import { Pagination } from '@/components/Pagination'
 import { TableCard } from '@/components/Panels'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Empty, ErrorBlock, LoadingBlock } from '@/components/States'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDate, plural } from '@/lib/format'
+import { StudentDetailDialog } from './StudentDetailDialog'
+
+type Student = components['schemas']['models.StudentProgress']
 
 const LIMIT = 20
 
 /** The students of a course with how far each has come. */
 export function StudentsTab({ courseId }: { courseId: string }) {
   const [page, setPage] = useState(1)
+  const [selected, setSelected] = useState<Student | null>(null)
 
   const students = useQuery({
     queryKey: ['students', courseId, page],
@@ -35,11 +41,12 @@ export function StudentsTab({ courseId }: { courseId: string }) {
               <TableHead>Student</TableHead>
               <TableHead className="w-56">Progress</TableHead>
               <TableHead>Last activity</TableHead>
+              <TableHead className="w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {students.data.items?.map((student) => (
-              <TableRow key={student.student_id}>
+              <TableRow key={student.student_id} className="cursor-pointer" onClick={() => setSelected(student)}>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
@@ -58,11 +65,17 @@ export function StudentsTab({ courseId }: { courseId: string }) {
                   </span>
                 </TableCell>
                 <TableCell>{formatDate(student.last_activity_at)}</TableCell>
+                <TableCell>
+                  <Button size="sm" variant="outline" aria-label={`Details of ${student.full_name}`} onClick={() => setSelected(student)}>
+                    Details
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableCard>
+      {selected && <StudentDetailDialog courseId={courseId} student={selected} onClose={() => setSelected(null)} />}
       <Pagination page={page} limit={LIMIT} total={students.data.total ?? 0} onPage={setPage} />
     </div>
   )

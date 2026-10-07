@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle2, DollarSign, Eye, FilePlus2, ListChecks, Rocket, Layers } from 'lucide-react'
 import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { z } from 'zod'
 import { api, call } from '@/api/client'
@@ -10,6 +10,7 @@ import type { components } from '@/api/schema'
 import { useAuth } from '@/auth/context'
 import { CourseCard } from '@/components/CourseCard'
 import { FormField } from '@/components/FormField'
+import { ListInput } from '@/components/ListInput'
 import { ImageUpload } from '@/components/ImageUpload'
 import { NativeSelect } from '@/components/NativeSelect'
 import { Button } from '@/components/ui/button'
@@ -148,26 +149,32 @@ export function CourseDetailsForm({ course }: { course?: CourseDetail }) {
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="learning_outcomes">What students learn</Label>
-                <Textarea
-                  id="learning_outcomes"
-                  rows={6}
-                  className="min-h-32 px-3.5 py-3 text-base"
-                  placeholder="One point on each line"
-                  {...register('learning_outcomes')}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="requirements">Requirements</Label>
-                <Textarea
-                  id="requirements"
-                  rows={6}
-                  className="min-h-32 px-3.5 py-3 text-base"
-                  placeholder="One point on each line"
-                  {...register('requirements')}
-                />
-              </div>
+              <Controller
+                control={control}
+                name="learning_outcomes"
+                render={({ field }) => (
+                  <ListInput
+                    id="learning_outcomes"
+                    label="What students learn"
+                    placeholder="For example: build a REST API"
+                    items={lines(field.value)}
+                    onChange={(items) => field.onChange(items.join('\n'))}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="requirements"
+                render={({ field }) => (
+                  <ListInput
+                    id="requirements"
+                    label="Requirements"
+                    placeholder="For example: basic Go knowledge"
+                    items={lines(field.value)}
+                    onChange={(items) => field.onChange(items.join('\n'))}
+                  />
+                )}
+              />
             </div>
           </CardContent>
         </Card>

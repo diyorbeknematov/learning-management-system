@@ -22,9 +22,9 @@ export function CourseCover({ url, className }: { url?: string; title?: string; 
   )
 }
 
-export function CourseCard({ course, label }: { course: CourseItem; label?: string }) {
+export function CourseCard({ course, label, to }: { course: CourseItem; label?: string; to?: string }) {
   return (
-    <Link to={`/courses/${course.id}`} className="group block h-full rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+    <Link to={to ?? `/courses/${course.id}`} className="group block h-full rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
       <Card className="h-full gap-0 overflow-hidden rounded-2xl py-0 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-lg">
         <div className="relative">
           <CourseCover url={course.cover_url} title={course.title} className="aspect-video w-full object-cover" />

@@ -1,16 +1,17 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
-import { ListChecks, Pencil, Plus } from 'lucide-react'
+import { Clock, ListChecks, Pencil, Plus, Repeat, Target } from 'lucide-react'
 import { useState } from 'react'
 import { api, call } from '@/api/client'
 import type { components } from '@/api/schema'
 import { ConfirmButton } from '@/components/ConfirmButton'
 import { NativeSelect } from '@/components/NativeSelect'
 import { ErrorBlock, LoadingBlock } from '@/components/States'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { plural } from '@/lib/format'
 import { useApiMutation } from '@/lib/mutations'
 import { QuestionsDialog } from './QuestionsDialog'
 
@@ -115,18 +116,37 @@ function QuizRow({ quiz, onEdit, onQuestions }: { quiz: Quiz; onEdit: () => void
   })
 
   return (
-    <li className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">
-      <span className="min-w-0 flex-1 font-medium">{quiz.title}</span>
-      <Badge variant="secondary">{quiz.time_limit} min</Badge>
-      <Badge variant="secondary">pass {quiz.pass_threshold}%</Badge>
-      <Badge variant="secondary">{quiz.max_attempts} attempts</Badge>
+    <li className="flex flex-wrap items-center gap-3 px-5 py-3.5 text-sm transition hover:bg-muted/30">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <ListChecks className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-medium">{quiz.title}</p>
+        <p className="mt-0.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Clock className="size-3.5" /> {quiz.time_limit} min
+          </span>
+          <span className="flex items-center gap-1">
+            <Target className="size-3.5" /> pass at {quiz.pass_threshold}%
+          </span>
+          <span className="flex items-center gap-1">
+            <Repeat className="size-3.5" /> {quiz.max_attempts} attempts
+          </span>
+        </p>
+      </div>
       <Button size="xs" variant="outline" onClick={onQuestions}>
         <ListChecks /> Questions
       </Button>
       <Button size="icon-xs" variant="ghost" aria-label="Edit the quiz" onClick={onEdit}>
         <Pencil />
       </Button>
-      <ConfirmButton size="xs" title="Delete this quiz?" description="Its questions and the attempts of students are deleted too." onConfirm={() => remove.mutate(undefined)} pending={remove.isPending}>
+      <ConfirmButton
+        size="xs"
+        title="Delete this quiz?"
+        description="Its questions and the attempts of students are deleted too."
+        onConfirm={() => remove.mutate(undefined)}
+        pending={remove.isPending}
+      >
         Delete
       </ConfirmButton>
     </li>
@@ -161,18 +181,21 @@ export function QuizzesTab({ courseId }: { courseId: string }) {
   if (courseQuizzes.isError) return <ErrorBlock error={courseQuizzes.error} />
 
   const list = (title: string, quizzes?: Quiz[]) => (
-    <section className="space-y-2" key={title}>
-      <h3 className="font-medium">{title}</h3>
+    <Card key={title} className="gap-0 overflow-hidden py-0">
+      <div className="flex items-center justify-between border-b bg-muted/40 px-5 py-3">
+        <h3 className="font-semibold">{title}</h3>
+        <span className="text-xs text-muted-foreground">{plural(quizzes?.length ?? 0, 'quiz', 'quizzes')}</span>
+      </div>
       {quizzes?.length ? (
-        <ul className="divide-y rounded-lg border">
+        <ul className="divide-y">
           {quizzes.map((quiz) => (
             <QuizRow key={quiz.id} quiz={quiz} onEdit={() => setDialog({ quiz })} onQuestions={() => setQuestions(quiz)} />
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">No quiz.</p>
+        <p className="px-5 py-4 text-sm text-muted-foreground">No quiz.</p>
       )}
-    </section>
+    </Card>
   )
 
   return (

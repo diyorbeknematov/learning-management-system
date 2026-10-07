@@ -33,7 +33,17 @@ const blank = (): Option[] => [
   { option_text: '', is_correct: false },
 ]
 
-function QuestionForm({ initial, submitting, onSubmit, onCancel }: { initial?: Question; submitting: boolean; onSubmit: (value: { text: string; type: QuestionType; options: Option[] }) => void; onCancel?: () => void }) {
+function QuestionForm({
+  initial,
+  submitting,
+  onSubmit,
+  onCancel,
+}: {
+  initial?: Question
+  submitting: boolean
+  onSubmit: (value: { text: string; type: QuestionType; options: Option[] }) => void
+  onCancel?: () => void
+}) {
   const [text, setText] = useState(initial?.text ?? '')
   const [type, setType] = useState<QuestionType>(initial?.type ?? 'single_choice')
   const [options, setOptions] = useState<Option[]>(
@@ -105,7 +115,13 @@ function QuestionForm({ initial, submitting, onSubmit, onCancel }: { initial?: Q
               aria-label={`Option ${index + 1}`}
             />
             {type !== 'true_false' && options.length > 2 && (
-              <Button type="button" size="icon-sm" variant="ghost" aria-label="Remove the option" onClick={() => setOptions(options.filter((_, i) => i !== index))}>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Remove the option"
+                onClick={() => setOptions(options.filter((_, i) => i !== index))}
+              >
                 <Trash2 />
               </Button>
             )}
@@ -174,7 +190,12 @@ export function QuestionsDialog({ quizId, title, onClose }: { quizId: string; ti
           {questions.data?.map((question, index) =>
             editing === question.id ? (
               <li key={question.id}>
-                <QuestionForm initial={question} submitting={update.isPending} onCancel={() => setEditing(null)} onSubmit={(body) => update.mutate({ id: question.id!, body })} />
+                <QuestionForm
+                  initial={question}
+                  submitting={update.isPending}
+                  onCancel={() => setEditing(null)}
+                  onSubmit={(body) => update.mutate({ id: question.id!, body })}
+                />
               </li>
             ) : (
               <li key={question.id} className="space-y-2 rounded-lg border p-3">

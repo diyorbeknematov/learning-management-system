@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Lock, PlayCircle } from 'lucide-react'
-import { Link, Navigate, useParams } from 'react-router'
+import { Link, Navigate, useMatch, useParams } from 'react-router'
 import { api, call } from '@/api/client'
 import { useAuth } from '@/auth/context'
 import { CourseAction, useEnrollment } from '@/components/CourseAction'
 import { LessonMaterials } from '@/components/LessonMaterials'
 import { ErrorBlock, LoadingBlock } from '@/components/States'
 import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { duration, money } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -17,6 +18,8 @@ export default function PreviewPage() {
   const { courseId = '', lessonId = '' } = useParams()
   const { user } = useAuth()
   const enrollment = useEnrollment(courseId)
+  const teach = Boolean(useMatch('/teach/courses/:courseId/preview/:lessonId'))
+  const base = teach ? `/teach/courses/${courseId}/preview` : `/courses/${courseId}/preview`
 
   const course = useQuery({
     queryKey: ['course', courseId],
@@ -27,7 +30,7 @@ export default function PreviewPage() {
   if (course.isError) return <ErrorBlock error={course.error} />
 
   // those who study the course have their own page
-  if (enrollment) return <Navigate to={`/learn/${courseId}/lessons/${lessonId}`} replace />
+  if (enrollment && !teach) return <Navigate to={`/learn/${courseId}/lessons/${lessonId}`} replace />
 
   const data = course.data
   const canManage = Boolean(user && (user.role_name === 'SuperAdmin' || user.id === data.instructor_id))
@@ -36,7 +39,18 @@ export default function PreviewPage() {
 
   return (
     <div className="space-y-6">
-      <Link to={`/courses/${courseId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      {teach && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+          <span className="text-muted-foreground">This is how a student sees your lesson.</span>
+          <Link to={`/teach/courses/${courseId}`} className={buttonVariants({ size: 'sm' })}>
+            <ArrowLeft /> Back to the course editor
+          </Link>
+        </div>
+      )}
+      <Link
+        to={teach ? `/teach/courses/${courseId}/preview` : `/courses/${courseId}`}
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="size-4" /> {data.title}
       </Link>
 
@@ -54,8 +68,11 @@ export default function PreviewPage() {
                       <li key={lesson.id}>
                         {open ? (
                           <Link
-                            to={`/courses/${courseId}/preview/${lesson.id}`}
-                            className={cn('flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted', lesson.id === lessonId && 'bg-muted font-medium')}
+                            to={`${base}/${lesson.id}`}
+                            className={cn(
+                              'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted',
+                              lesson.id === lessonId && 'bg-muted font-medium',
+                            )}
                           >
                             <PlayCircle className="size-4 shrink-0 text-primary" />
                             <span className="flex-1">{lesson.title}</span>

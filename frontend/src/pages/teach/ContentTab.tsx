@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ArrowDown, ArrowUp, Eye, FolderOpen, Pencil, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUp, Clock, Eye, FolderOpen, Layers, Pencil, PlayCircle, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { api, call } from '@/api/client'
 import { ConfirmButton } from '@/components/ConfirmButton'
@@ -182,14 +182,23 @@ export function ContentTab({ courseId }: { courseId: string }) {
         </Button>
       </div>
 
-      {modules.length === 0 && <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">No modules yet.</p>}
+      {modules.length === 0 && (
+        <div className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">
+          <Layers className="mx-auto mb-2 size-8" />
+          No modules yet. Add the first module, then put lessons in it.
+        </div>
+      )}
 
       {modules.map((module, moduleIndex) => (
-        <Card key={module.id} className="gap-4 py-5">
-          <div className="flex items-center gap-2 px-5">
-            <h3 className="flex-1 font-medium">
-              {moduleIndex + 1}. {module.title}
-            </h3>
+        <Card key={module.id} className="gap-0 overflow-hidden py-0">
+          <div className="flex items-center gap-3 border-b bg-muted/40 px-5 py-3.5">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
+              {moduleIndex + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-base font-semibold">{module.title}</h3>
+              <p className="text-xs text-muted-foreground">{plural(module.lessons?.length ?? 0, 'lesson')}</p>
+            </div>
             <Button
               size="icon-sm"
               variant="ghost"
@@ -220,50 +229,56 @@ export function ContentTab({ courseId }: { courseId: string }) {
               Delete
             </ConfirmButton>
           </div>
-          <CardContent className="space-y-2">
-            {module.lessons?.length === 0 && <p className="text-sm text-muted-foreground">No lessons yet.</p>}
 
-            <ul className="divide-y rounded-lg border">
+          <CardContent className="p-0">
+            {module.lessons?.length === 0 && <p className="px-5 py-4 text-sm text-muted-foreground">No lessons yet.</p>}
+
+            <ul className="divide-y">
               {module.lessons?.map((lesson, lessonIndex) => (
-                <li key={lesson.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">
-                  <span className="min-w-0 flex-1">
+                <li key={lesson.id} className="flex flex-wrap items-center gap-3 px-5 py-3 text-sm transition hover:bg-muted/30">
+                  <PlayCircle className="size-5 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1 font-medium">
                     {lessonIndex + 1}. {lesson.title}
                   </span>
                   {lesson.is_preview && (
                     <Badge variant="secondary">
-                      <Eye /> Preview
+                      <Eye /> Free preview
                     </Badge>
                   )}
-                  <span className="text-xs text-muted-foreground">{duration(lesson.duration)}</span>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="size-3.5" /> {duration(lesson.duration)}
+                  </span>
                   <Button size="xs" variant="outline" onClick={() => setEditing({ kind: 'materials', lesson })}>
                     <FolderOpen /> Materials
                   </Button>
-                  <Button
-                    size="icon-xs"
-                    variant="ghost"
-                    aria-label="Move the lesson up"
-                    disabled={lessonIndex === 0 || moveLesson.isPending}
-                    onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex })}
-                  >
-                    <ArrowUp />
-                  </Button>
-                  <Button
-                    size="icon-xs"
-                    variant="ghost"
-                    aria-label="Move the lesson down"
-                    disabled={lessonIndex === (module.lessons?.length ?? 0) - 1 || moveLesson.isPending}
-                    onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex + 2 })}
-                  >
-                    <ArrowDown />
-                  </Button>
-                  <Button
-                    size="icon-xs"
-                    variant="ghost"
-                    aria-label="Edit the lesson"
-                    onClick={() => setEditing({ kind: 'lesson', moduleId: module.id!, lesson })}
-                  >
-                    <Pencil />
-                  </Button>
+                  <div className="flex items-center">
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      aria-label="Move the lesson up"
+                      disabled={lessonIndex === 0 || moveLesson.isPending}
+                      onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex })}
+                    >
+                      <ArrowUp />
+                    </Button>
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      aria-label="Move the lesson down"
+                      disabled={lessonIndex === (module.lessons?.length ?? 0) - 1 || moveLesson.isPending}
+                      onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex + 2 })}
+                    >
+                      <ArrowDown />
+                    </Button>
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      aria-label="Edit the lesson"
+                      onClick={() => setEditing({ kind: 'lesson', moduleId: module.id!, lesson })}
+                    >
+                      <Pencil />
+                    </Button>
+                  </div>
                   <ConfirmButton
                     size="xs"
                     title="Delete this lesson?"
@@ -277,9 +292,13 @@ export function ContentTab({ courseId }: { courseId: string }) {
               ))}
             </ul>
 
-            <Button size="sm" variant="outline" onClick={() => setEditing({ kind: 'lesson', moduleId: module.id! })}>
-              <Plus /> Add a lesson
-            </Button>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 border-t border-dashed px-5 py-3 text-sm font-medium text-primary transition hover:bg-primary/5"
+              onClick={() => setEditing({ kind: 'lesson', moduleId: module.id! })}
+            >
+              <Plus className="size-4" /> Add a lesson
+            </button>
           </CardContent>
         </Card>
       ))}

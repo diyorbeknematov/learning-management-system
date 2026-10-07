@@ -26,8 +26,7 @@ export default function CourseEditorPage() {
   })
 
   const status = useApiMutation(
-    (next: 'draft' | 'published') =>
-      call(api.PATCH('/courses/{courseId}/status', { params: { path: { courseId } }, body: { status: next } })),
+    (next: 'draft' | 'published') => call(api.PATCH('/courses/{courseId}/status', { params: { path: { courseId } }, body: { status: next } })),
     {
       invalidate: [['course', courseId], ['courses']],
       onSuccess: (_, next) => toast.success(next === 'published' ? 'The course is published' : 'The course is a draft again'),
@@ -44,7 +43,7 @@ export default function CourseEditorPage() {
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="min-w-0 flex-1 text-2xl font-semibold">{course.data.title}</h1>
         <Badge variant={published ? 'default' : 'outline'}>{published ? 'Published' : 'Draft'}</Badge>
-        <Link to={`/courses/${courseId}`} className={buttonVariants({ variant: 'outline' })}>
+        <Link to={`/teach/courses/${courseId}/preview`} className={buttonVariants({ variant: 'outline' })}>
           <Eye /> View as a student
         </Link>
         <Button disabled={status.isPending} variant={published ? 'outline' : 'default'} onClick={() => status.mutate(published ? 'draft' : 'published')}>

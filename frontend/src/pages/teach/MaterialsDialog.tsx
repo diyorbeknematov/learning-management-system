@@ -102,7 +102,13 @@ function AddMaterial({ lessonId }: { lessonId: string }) {
   )
 }
 
-function MaterialRow({ lessonId, material }: { lessonId: string; material: { id?: string; type?: string; content?: string; file_name?: string; file_url?: string } }) {
+function MaterialRow({
+  lessonId,
+  material,
+}: {
+  lessonId: string
+  material: { id?: string; type?: string; content?: string; file_name?: string; file_url?: string }
+}) {
   const [editing, setEditing] = useState(false)
   const [content, setContent] = useState(material.content ?? '')
 
@@ -111,10 +117,10 @@ function MaterialRow({ lessonId, material }: { lessonId: string; material: { id?
     { success: 'Material saved', invalidate: [['materials', lessonId]], onSuccess: () => setEditing(false) },
   )
 
-  const remove = useApiMutation(
-    () => call(api.DELETE('/materials/{materialId}', { params: { path: { materialId: material.id! } } })),
-    { success: 'Material deleted', invalidate: [['materials', lessonId]] },
-  )
+  const remove = useApiMutation(() => call(api.DELETE('/materials/{materialId}', { params: { path: { materialId: material.id! } } })), {
+    success: 'Material deleted',
+    invalidate: [['materials', lessonId]],
+  })
 
   const Icon = material.type === 'text' ? Type : material.type === 'video' ? Link2 : FileText
 

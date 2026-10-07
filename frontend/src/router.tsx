@@ -72,6 +72,8 @@ export const router = createBrowserRouter([
               { path: 'teach/courses', lazy: page(() => import('@/pages/teach/TeachCoursesPage')) },
               { path: 'teach/courses/new', lazy: page(() => import('@/pages/teach/NewCoursePage')) },
               { path: 'teach/courses/:courseId', lazy: page(() => import('@/pages/teach/CourseEditorPage')) },
+              { path: 'teach/courses/:courseId/preview', lazy: page(() => import('@/pages/CoursePage')) },
+              { path: 'teach/courses/:courseId/preview/:lessonId', lazy: page(() => import('@/pages/PreviewPage')) },
             ],
           },
 

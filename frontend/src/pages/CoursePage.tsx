@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { Clock, GraduationCap, Layers, Lock, PlayCircle, Users } from 'lucide-react'
-import { Link, useParams } from 'react-router'
+import { ArrowLeft, Clock, GraduationCap, Layers, Lock, PlayCircle, Users } from 'lucide-react'
+import { Link, useMatch, useParams } from 'react-router'
 import { api, call } from '@/api/client'
 import { hasRole, useAuth } from '@/auth/context'
 import { CourseAction, useEnrollment } from '@/components/CourseAction'
@@ -25,6 +25,8 @@ export default function CoursePage() {
   })
 
   const enrollment = useEnrollment(courseId)
+  // the instructor looks at the course as a student would, without leaving Teach
+  const preview = Boolean(useMatch('/teach/courses/:courseId/preview'))
 
   if (course.isPending) return <LoadingBlock rows={4} />
   if (course.isError) return <ErrorBlock error={course.error} />
@@ -36,6 +38,14 @@ export default function CoursePage() {
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_28rem]">
       <div className="min-w-0 space-y-10">
+        {preview && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+            <span className="text-muted-foreground">This is how a student sees your course.</span>
+            <Link to={`/teach/courses/${courseId}`} className={buttonVariants({ size: 'sm' })}>
+              <ArrowLeft /> Back to the course editor
+            </Link>
+          </div>
+        )}
         <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -104,7 +114,11 @@ export default function CoursePage() {
                     <ul className="space-y-1">
                       {module.lessons?.map((lesson) => {
                         const open = lesson.is_preview || Boolean(enrollment) || canManage
-                        const target = enrollment ? `/learn/${courseId}/lessons/${lesson.id}` : `/courses/${courseId}/preview/${lesson.id}`
+                        const target = preview
+                          ? `/teach/courses/${courseId}/preview/${lesson.id}`
+                          : enrollment
+                            ? `/learn/${courseId}/lessons/${lesson.id}`
+                            : `/courses/${courseId}/preview/${lesson.id}`
 
                         return (
                           <li key={lesson.id}>
@@ -158,8 +172,8 @@ export default function CoursePage() {
           <CourseCover url={data.cover_url} title={data.title} className="h-44 w-full object-cover" />
           <CardContent className="space-y-3 pt-2">
             <p className="text-3xl font-semibold">{money(data.price)}</p>
-            <CourseAction courseId={courseId} price={data.price} from={`/courses/${courseId}`} />
-            {canManage && (
+            {!preview && <CourseAction courseId={courseId} price={data.price} from={`/courses/${courseId}`} />}
+            {!preview && canManage && (
               <Link to={`/teach/courses/${courseId}`} className={buttonVariants({ variant: 'outline' }) + ' w-full'}>
                 Manage this course
               </Link>

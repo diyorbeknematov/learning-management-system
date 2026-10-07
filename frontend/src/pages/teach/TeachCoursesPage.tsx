@@ -45,10 +45,15 @@ export default function TeachCoursesPage() {
       <div className={courseGrid}>
         {courses.data?.items?.map((course) => (
           <div key={course.id} className="relative">
-            <CourseCard course={course} />
-            <Link to={`/teach/courses/${course.id}`} className={buttonVariants({ size: 'sm', variant: 'secondary' }) + ' absolute right-3 top-3'}>
-              Edit
-            </Link>
+            <CourseCard course={course} to={`/teach/courses/${course.id}`} />
+            <div className="absolute right-3 top-3 flex gap-2">
+              <Link to={`/teach/courses/${course.id}?tab=students`} className={buttonVariants({ size: 'sm', variant: 'secondary' })}>
+                Students
+              </Link>
+              <Link to={`/teach/courses/${course.id}`} className={buttonVariants({ size: 'sm', variant: 'secondary' })}>
+                Edit
+              </Link>
+            </div>
           </div>
         ))}
       </div>
