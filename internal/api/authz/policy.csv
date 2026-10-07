@@ -1,0 +1,127 @@
+# Who may call which route: p, <role>, <route pattern>, <method>.
+#
+# Roles: Student, Instructor (SuperAdmin has all of Instructor), User (everybody
+# who is logged in has all of User), SuperAdmin. The route is written the way
+# the router has it, so :courseId must match its name there.
+#
+# A route that is not in this file is closed to everybody. Routes that are
+# open to visitors are not listed at all; they are in the public group of the
+# router.
+#
+# The service still checks the owner of a resource ("is this your course?");
+# this file answers only "may this kind of user call this route at all".
+
+# --- who has which roles
+g, Student, User
+g, Instructor, User
+g, SuperAdmin, Instructor
+
+# --- users
+p, SuperAdmin, /api/v1/users, GET
+p, SuperAdmin, /api/v1/users, POST
+p, SuperAdmin, /api/v1/users/:id, GET
+p, SuperAdmin, /api/v1/users/:id, PUT
+p, SuperAdmin, /api/v1/users/:id, DELETE
+p, SuperAdmin, /api/v1/users/:id/status, PATCH
+p, User, /api/v1/users/me, GET
+p, User, /api/v1/users/me, PUT
+p, User, /api/v1/users/me/password, PUT
+
+# --- file uploads
+p, User, /api/v1/uploads/presign, POST
+
+# --- categories
+p, SuperAdmin, /api/v1/categories, POST
+p, SuperAdmin, /api/v1/categories/:id, PUT
+p, SuperAdmin, /api/v1/categories/:id, DELETE
+
+# --- courses
+p, Instructor, /api/v1/courses, POST
+p, Instructor, /api/v1/courses/:courseId, PUT
+p, Instructor, /api/v1/courses/:courseId, DELETE
+p, Instructor, /api/v1/courses/:courseId/status, PATCH
+
+# --- modules
+p, Instructor, /api/v1/courses/:courseId/modules, POST
+p, Instructor, /api/v1/modules/:moduleId, PUT
+p, Instructor, /api/v1/modules/:moduleId, DELETE
+p, Instructor, /api/v1/modules/:moduleId/order, PATCH
+
+# --- lessons
+p, Instructor, /api/v1/modules/:moduleId/lessons, POST
+p, Instructor, /api/v1/lessons/:lessonId, PUT
+p, Instructor, /api/v1/lessons/:lessonId, DELETE
+p, Instructor, /api/v1/lessons/:lessonId/order, PATCH
+
+# --- lesson materials
+p, Instructor, /api/v1/lessons/:lessonId/materials, POST
+p, Instructor, /api/v1/materials/:materialId, PUT
+p, Instructor, /api/v1/materials/:materialId, DELETE
+
+# --- enrollments
+p, Student, /api/v1/courses/:courseId/enrollments, POST
+p, Instructor, /api/v1/courses/:courseId/enrollments, GET
+p, Student, /api/v1/enrollments/me, GET
+p, User, /api/v1/enrollments/:enrollmentId, GET
+p, User, /api/v1/enrollments/:enrollmentId/status, PATCH
+
+# --- progress of a student
+p, Student, /api/v1/courses/:courseId/progress, GET
+p, Student, /api/v1/lessons/:lessonId/progress, GET
+p, Student, /api/v1/lessons/:lessonId/progress, POST
+
+# --- the instructor looks at the students
+p, Instructor, /api/v1/courses/:courseId/students, GET
+p, Instructor, /api/v1/courses/:courseId/students/:studentId/progress, GET
+
+# --- quizzes
+p, User, /api/v1/courses/:courseId/quizzes, GET
+p, Instructor, /api/v1/courses/:courseId/quizzes, POST
+p, User, /api/v1/modules/:moduleId/quizzes, GET
+p, Instructor, /api/v1/modules/:moduleId/quizzes, POST
+p, User, /api/v1/quizzes/:quizId, GET
+p, Instructor, /api/v1/quizzes/:quizId, PUT
+p, Instructor, /api/v1/quizzes/:quizId, DELETE
+
+# --- questions (only the author sees them; students get them in an attempt)
+p, Instructor, /api/v1/quizzes/:quizId/questions, GET
+p, Instructor, /api/v1/quizzes/:quizId/questions, POST
+p, Instructor, /api/v1/questions/:questionId, GET
+p, Instructor, /api/v1/questions/:questionId, PUT
+p, Instructor, /api/v1/questions/:questionId, DELETE
+
+# --- quiz attempts
+p, Student, /api/v1/quizzes/:quizId/attempts, POST
+p, User, /api/v1/quizzes/:quizId/attempts, GET
+p, User, /api/v1/attempts/:attemptId, GET
+p, Student, /api/v1/attempts/:attemptId/submit, POST
+
+# --- certificates
+p, Student, /api/v1/certificates/me, GET
+p, User, /api/v1/certificates/:certificateId, GET
+p, User, /api/v1/certificates/:certificateId/download, GET
+
+# --- reviews
+p, Student, /api/v1/courses/:courseId/reviews, POST
+p, Student, /api/v1/reviews/:reviewId, PUT
+p, User, /api/v1/reviews/:reviewId, DELETE
+
+# --- payments
+p, SuperAdmin, /api/v1/payments, GET
+p, User, /api/v1/payments/:paymentId, GET
+p, User, /api/v1/enrollments/:enrollmentId/payment, GET
+
+# --- finance
+p, SuperAdmin, /api/v1/finance, GET
+p, SuperAdmin, /api/v1/finance/revenue, GET
+p, SuperAdmin, /api/v1/finance/expenses, GET
+
+# --- reports
+p, SuperAdmin, /api/v1/reports/enrollments, GET
+p, SuperAdmin, /api/v1/reports/revenue, GET
+p, SuperAdmin, /api/v1/reports/students, GET
+p, SuperAdmin, /api/v1/reports/progress, GET
+p, SuperAdmin, /api/v1/reports/quizzes, GET
+p, SuperAdmin, /api/v1/reports/certificates, GET
+p, SuperAdmin, /api/v1/reports/instructors, GET
+p, SuperAdmin, /api/v1/reports/reviews, GET
