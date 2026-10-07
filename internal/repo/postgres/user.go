@@ -2,16 +2,13 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 type userRepo struct {
@@ -113,21 +110,7 @@ func (r *userRepo) Create(ctx context.Context, user models.CreateUser) (uuid.UUI
 	)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateUser",
-				"email or username already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateUser",
-			"failed to create user",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateUser", "failed to create user")
 	}
 
 	return id, nil
@@ -144,6 +127,7 @@ func (r *userRepo) Update(ctx context.Context, updateData models.UpdateUser) (*m
 			password = COALESCE($6, password),
 			avatar = COALESCE($7, avatar),
 			bio = COALESCE($8, bio),
+			role_id = COALESCE($9, role_id),
 			updated_at = CURRENT_TIMESTAMP
 		WHERE deleted_at IS NULL AND id = $1;
 	`
@@ -159,23 +143,10 @@ func (r *userRepo) Update(ctx context.Context, updateData models.UpdateUser) (*m
 		updateData.Password,
 		updateData.Avatar,
 		updateData.Bio,
+		updateData.RoleID,
 	)
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return nil, apperror.Conflict(
-				"repository",
-				"UpdateUser",
-				"email or username already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateUser",
-			"failed to update user",
-			err,
-		)
+		return nil, handleError(err, "UpdateUser", "failed to update user")
 	}
 
 	if res.RowsAffected() == 0 {
@@ -308,24 +279,109 @@ func (r *userRepo) GetByID(ctx context.Context, id string) (*models.User, error)
 		&user.UpdatedAt,
 	)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetUserByID",
-				"user not found",
-				apperror.ErrUserNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetUserByID",
-			"failed to get user by id",
-			err,
-		)
+		return nil, handleError(err, "GetUserByID", "failed to get user by id")
 	}
 
 	return &user, nil
+}
+
+func (r *userRepo) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := `
+		SELECT 
+			u.id,
+			u.first_name,
+			u.last_name,
+			u.username,
+			u.email,
+			u.avatar,
+			u.bio,
+			u.role_id,
+			r.name AS role_name,
+			u.status,
+			u.created_at,
+			u.updated_at
+		FROM users u
+		JOIN roles r ON r.id = u.role_id
+		WHERE u.deleted_at IS NULL 
+			AND u.email = $1;
+	`
+	var user models.User
+
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		email,
+	).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Username,
+		&user.Email,
+		&user.Avatar,
+		&user.Bio,
+		&user.RoleID,
+		&user.RoleName,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, handleError(err, "GetUserByEmail", "failed to get user by email")
+	}
+
+	return &user, nil
+}
+
+// GetPasswordHash returns the password hash of a user, used to check the old
+// password when it is changed.
+func (r *userRepo) GetPasswordHash(ctx context.Context, id string) (string, error) {
+	query := `
+		SELECT password
+		FROM users
+		WHERE deleted_at IS NULL
+			AND id = $1;
+	`
+
+	var hash string
+
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		id,
+	).Scan(&hash)
+
+	if err != nil {
+		return "", handleError(err, "GetUserPasswordHash", "failed to get user password")
+	}
+
+	return hash, nil
+}
+
+func (r *userRepo) GetRoleByName(ctx context.Context, name string) (*models.Role, error) {
+	query := `
+		SELECT
+			id,
+			name
+		FROM roles
+		WHERE name = $1;
+	`
+
+	var role models.Role
+
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		name,
+	).Scan(
+		&role.ID,
+		&role.Name,
+	)
+
+	if err != nil {
+		return nil, handleError(err, "GetRoleByName", "failed to get role by name")
+	}
+
+	return &role, nil
 }
 
 func (r *userRepo) GetByUsername(ctx context.Context, username string) (*models.GetByUsername, error) {
@@ -360,21 +416,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (*models.
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetUserByUsername",
-				"user not found",
-				apperror.ErrUserNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetUserByUsername",
-			"failed to get user by username",
-			err,
-		)
+		return nil, handleError(err, "GetUserByUsername", "failed to get user by username")
 	}
 
 	return &user, nil

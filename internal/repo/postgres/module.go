@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -64,30 +62,7 @@ func (r *moduleRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateModule",
-				"module order number already exists in this course",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateModule",
-				"course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateModule",
-			"failed to create module",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateModule", "failed to create module")
 	}
 
 	return id, nil
@@ -116,21 +91,7 @@ func (r *moduleRepo) GetByID(
 	err := scanModule(r.db.QueryRow(ctx, query, id), &module)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetModuleByID",
-				"module not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetModuleByID",
-			"failed to get module",
-			err,
-		)
+		return nil, handleError(err, "GetModuleByID", "failed to get module")
 	}
 
 	return &module, nil
@@ -231,21 +192,7 @@ func (r *moduleRepo) Update(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateModule",
-				"module not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateModule",
-			"failed to update module",
-			err,
-		)
+		return nil, handleError(err, "UpdateModule", "failed to update module")
 	}
 
 	return &updatedModule, nil
@@ -272,21 +219,7 @@ func (r *moduleRepo) UpdateOrder(
 	)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return apperror.Conflict(
-				"repository",
-				"UpdateModuleOrder",
-				"module order number already exists in this course",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return apperror.Internal(
-			"repository",
-			"UpdateModuleOrder",
-			"failed to update module order",
-			err,
-		)
+		return handleError(err, "UpdateModuleOrder", "failed to update module order")
 	}
 
 	if result.RowsAffected() == 0 {

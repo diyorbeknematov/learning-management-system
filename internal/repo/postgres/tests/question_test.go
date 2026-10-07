@@ -265,3 +265,41 @@ func TestQuestionRepo_DeleteOptions(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, options)
 }
+
+func TestQuestionRepo_Options_AreOrderedByPosition(t *testing.T) {
+	tc := setupTest(t)
+
+	ctx := context.Background()
+
+	quizID, _ := createTestQuiz(t, tc)
+	questionID := createTestQuestion(t, tc, quizID, 1)
+
+	// written in a different order than they are positioned
+	for _, option := range []struct {
+		text     string
+		position int
+	}{{"third", 3}, {"first", 1}, {"fourth", 4}, {"second", 2}} {
+		err := tc.Repo.Question.CreateOption(ctx, models.CreateQuestionOption{
+			QuestionID: questionID,
+			Position:   option.position,
+			OptionText: option.text,
+		})
+		require.NoError(t, err)
+	}
+
+	options, err := tc.Repo.Question.GetOptions(ctx, questionID)
+	require.NoError(t, err)
+
+	texts := make([]string, len(options))
+	for i, option := range options {
+		texts[i] = option.OptionText
+	}
+
+	require.Equal(t, []string{"first", "second", "third", "fourth"}, texts)
+
+	all, err := tc.Repo.Question.GetOptionsByQuizID(ctx, quizID)
+	require.NoError(t, err)
+	require.Len(t, all, 4)
+	require.Equal(t, "first", all[0].OptionText)
+	require.Equal(t, "fourth", all[3].OptionText)
+}

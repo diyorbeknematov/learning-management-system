@@ -2,14 +2,12 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -92,21 +90,7 @@ func (r *courseRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsForeignKeyViolation(err) || pgerr.IsCheckViolation(err) {
-			return uuid.Nil, apperror.InvalidInput(
-				"repository",
-				"CreateCourse",
-				"invalid category, instructor or payout",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateCourse",
-			"failed to create course",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateCourse", "failed to create course")
 	}
 
 	return id, nil
@@ -136,21 +120,7 @@ func (r *courseRepo) CreateLearningOutcome(
 	)
 
 	if err != nil {
-		if pgerr.IsForeignKeyViolation(err) {
-			return apperror.NotFound(
-				"repository",
-				"CreateLearningOutcome",
-				"course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return apperror.Internal(
-			"repository",
-			"CreateLearningOutcome",
-			"failed to create learning outcome",
-			err,
-		)
+		return handleError(err, "CreateLearningOutcome", "failed to create learning outcome")
 	}
 
 	return nil
@@ -180,21 +150,7 @@ func (r *courseRepo) CreateRequirement(
 	)
 
 	if err != nil {
-		if pgerr.IsForeignKeyViolation(err) {
-			return apperror.NotFound(
-				"repository",
-				"CreateRequirement",
-				"course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return apperror.Internal(
-			"repository",
-			"CreateRequirement",
-			"failed to create requirement",
-			err,
-		)
+		return handleError(err, "CreateRequirement", "failed to create requirement")
 	}
 
 	return nil
@@ -231,21 +187,7 @@ func (r *courseRepo) GetByID(
 	err := scanCourse(r.db.QueryRow(ctx, query, id), &course)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetCourseByID",
-				"course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetCourseByID",
-			"failed to get course",
-			err,
-		)
+		return nil, handleError(err, "GetCourseByID", "failed to get course")
 	}
 
 	return &course, nil
@@ -703,30 +645,7 @@ func (r *courseRepo) Update(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateCourse",
-				"course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) || pgerr.IsCheckViolation(err) {
-			return nil, apperror.InvalidInput(
-				"repository",
-				"UpdateCourse",
-				"invalid category or payout",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateCourse",
-			"failed to update course",
-			err,
-		)
+		return nil, handleError(err, "UpdateCourse", "failed to update course")
 	}
 
 	return &updatedCourse, nil

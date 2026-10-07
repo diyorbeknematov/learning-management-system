@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -84,30 +82,7 @@ func (r *lessonRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateLesson",
-				"lesson order number already exists in this module",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateLesson",
-				"module not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateLesson",
-			"failed to create lesson",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateLesson", "failed to create lesson")
 	}
 
 	return id, nil
@@ -137,21 +112,7 @@ func (r *lessonRepo) GetByID(
 	err := scanLesson(r.db.QueryRow(ctx, query, id), &lesson)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetLessonByID",
-				"lesson not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetLessonByID",
-			"failed to get lesson",
-			err,
-		)
+		return nil, handleError(err, "GetLessonByID", "failed to get lesson")
 	}
 
 	return &lesson, nil
@@ -256,21 +217,7 @@ func (r *lessonRepo) Update(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateLesson",
-				"lesson not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateLesson",
-			"failed to update lesson",
-			err,
-		)
+		return nil, handleError(err, "UpdateLesson", "failed to update lesson")
 	}
 
 	return &updatedLesson, nil
@@ -297,21 +244,7 @@ func (r *lessonRepo) UpdateOrder(
 	)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return apperror.Conflict(
-				"repository",
-				"UpdateLessonOrder",
-				"lesson order number already exists in this module",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return apperror.Internal(
-			"repository",
-			"UpdateLessonOrder",
-			"failed to update lesson order",
-			err,
-		)
+		return handleError(err, "UpdateLessonOrder", "failed to update lesson order")
 	}
 
 	if result.RowsAffected() == 0 {
@@ -434,30 +367,7 @@ func (r *lessonRepo) CreateMaterial(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsCheckViolation(err) {
-			return uuid.Nil, apperror.InvalidInput(
-				"repository",
-				"CreateMaterial",
-				"text and video need content, file needs object key",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateMaterial",
-				"lesson not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateMaterial",
-			"failed to create material",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateMaterial", "failed to create material")
 	}
 
 	return id, nil
@@ -489,21 +399,7 @@ func (r *lessonRepo) GetMaterialByID(
 	err := scanMaterial(r.db.QueryRow(ctx, query, id), &material)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetMaterialByID",
-				"material not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetMaterialByID",
-			"failed to get material",
-			err,
-		)
+		return nil, handleError(err, "GetMaterialByID", "failed to get material")
 	}
 
 	return &material, nil
@@ -616,21 +512,7 @@ func (r *lessonRepo) UpdateMaterial(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateMaterial",
-				"material not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateMaterial",
-			"failed to update material",
-			err,
-		)
+		return nil, handleError(err, "UpdateMaterial", "failed to update material")
 	}
 
 	return &updatedMaterial, nil

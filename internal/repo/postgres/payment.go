@@ -2,14 +2,12 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -65,39 +63,7 @@ func (r *paymentRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreatePayment",
-				"enrollment is already paid",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsCheckViolation(err) {
-			return uuid.Nil, apperror.InvalidInput(
-				"repository",
-				"CreatePayment",
-				"payment amount cannot be negative",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreatePayment",
-				"enrollment not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreatePayment",
-			"failed to create payment",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreatePayment", "failed to create payment")
 	}
 
 	return id, nil
@@ -125,21 +91,7 @@ func (r *paymentRepo) GetByID(
 	err := scanPayment(r.db.QueryRow(ctx, query, id), &payment)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetPaymentByID",
-				"payment not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetPaymentByID",
-			"failed to get payment",
-			err,
-		)
+		return nil, handleError(err, "GetPaymentByID", "failed to get payment")
 	}
 
 	return &payment, nil
@@ -167,21 +119,7 @@ func (r *paymentRepo) GetByEnrollmentID(
 	err := scanPayment(r.db.QueryRow(ctx, query, enrollmentID), &payment)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetPaymentByEnrollmentID",
-				"payment not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetPaymentByEnrollmentID",
-			"failed to get payment",
-			err,
-		)
+		return nil, handleError(err, "GetPaymentByEnrollmentID", "failed to get payment")
 	}
 
 	return &payment, nil
@@ -356,39 +294,7 @@ func (r *paymentRepo) CreatePayout(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreatePayout",
-				"payout for this enrollment already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsCheckViolation(err) {
-			return uuid.Nil, apperror.InvalidInput(
-				"repository",
-				"CreatePayout",
-				"invalid payout value or amount",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreatePayout",
-				"instructor, course or enrollment not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreatePayout",
-			"failed to create payout",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreatePayout", "failed to create payout")
 	}
 
 	return id, nil

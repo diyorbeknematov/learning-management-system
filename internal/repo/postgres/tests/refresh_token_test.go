@@ -70,7 +70,7 @@ func TestRefreshTokenRepo_GetByTokenHash_NotFound(t *testing.T) {
 
 	appErr, ok := apperror.As(err)
 	require.True(t, ok)
-	require.Equal(t, apperror.CodeUnauthorized, appErr.Code)
+	require.Equal(t, apperror.CodeNotFound, appErr.Code)
 }
 
 func TestRefreshTokenRepo_DeleteByTokenHash(t *testing.T) {

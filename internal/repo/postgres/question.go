@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -64,30 +62,7 @@ func (r *questionRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateQuestion",
-				"question order number already exists in this quiz",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateQuestion",
-				"quiz not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateQuestion",
-			"failed to create question",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateQuestion", "failed to create question")
 	}
 
 	return id, nil
@@ -102,9 +77,10 @@ func (r *questionRepo) CreateOption(
 			id,
 			question_id,
 			option_text,
-			is_correct
+			is_correct,
+			position
 		)
-		VALUES ($1, $2, $3, $4);
+		VALUES ($1, $2, $3, $4, $5);
 	`
 
 	_, err := r.db.Exec(
@@ -114,24 +90,11 @@ func (r *questionRepo) CreateOption(
 		option.QuestionID,
 		option.OptionText,
 		option.IsCorrect,
+		option.Position,
 	)
 
 	if err != nil {
-		if pgerr.IsForeignKeyViolation(err) {
-			return apperror.NotFound(
-				"repository",
-				"CreateQuestionOption",
-				"question not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return apperror.Internal(
-			"repository",
-			"CreateQuestionOption",
-			"failed to create question option",
-			err,
-		)
+		return handleError(err, "CreateQuestionOption", "failed to create question option")
 	}
 
 	return nil
@@ -160,21 +123,7 @@ func (r *questionRepo) GetByID(
 	err := scanQuestion(r.db.QueryRow(ctx, query, id), &question)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetQuestionByID",
-				"question not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetQuestionByID",
-			"failed to get question",
-			err,
-		)
+		return nil, handleError(err, "GetQuestionByID", "failed to get question")
 	}
 
 	return &question, nil
@@ -252,7 +201,7 @@ func (r *questionRepo) GetOptions(
 		FROM question_options
 		WHERE question_id = $1
 			AND deleted_at IS NULL
-		ORDER BY created_at;
+		ORDER BY position, created_at;
 	`
 
 	return r.getOptions(ctx, "GetQuestionOptions", query, questionID)
@@ -275,7 +224,7 @@ func (r *questionRepo) GetOptionsByQuizID(
 		WHERE q.quiz_id = $1
 			AND q.deleted_at IS NULL
 			AND o.deleted_at IS NULL
-		ORDER BY q.order_number, o.created_at;
+		ORDER BY q.order_number, o.position, o.created_at;
 	`
 
 	return r.getOptions(ctx, "GetQuizOptions", query, quizID)
@@ -371,30 +320,7 @@ func (r *questionRepo) Update(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateQuestion",
-				"question not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		if pgerr.IsUniqueViolation(err) {
-			return nil, apperror.Conflict(
-				"repository",
-				"UpdateQuestion",
-				"question order number already exists in this quiz",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateQuestion",
-			"failed to update question",
-			err,
-		)
+		return nil, handleError(err, "UpdateQuestion", "failed to update question")
 	}
 
 	return &updatedQuestion, nil

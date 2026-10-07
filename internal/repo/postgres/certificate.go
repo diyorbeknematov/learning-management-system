@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -73,30 +71,7 @@ func (r *certificateRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateCertificate",
-				"certificate already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateCertificate",
-				"student or course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateCertificate",
-			"failed to create certificate",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateCertificate", "failed to create certificate")
 	}
 
 	return id, nil
@@ -131,21 +106,7 @@ func (r *certificateRepo) GetByID(
 	err := scanCertificateDetail(r.db.QueryRow(ctx, query, id), &certificate)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetCertificateByID",
-				"certificate not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetCertificateByID",
-			"failed to get certificate",
-			err,
-		)
+		return nil, handleError(err, "GetCertificateByID", "failed to get certificate")
 	}
 
 	return &certificate, nil
@@ -181,21 +142,7 @@ func (r *certificateRepo) GetByUniqueID(
 	err := scanCertificateDetail(r.db.QueryRow(ctx, query, uniqueID), &certificate)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetCertificateByUniqueID",
-				"certificate not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetCertificateByUniqueID",
-			"failed to get certificate",
-			err,
-		)
+		return nil, handleError(err, "GetCertificateByUniqueID", "failed to get certificate")
 	}
 
 	return &certificate, nil
@@ -242,21 +189,7 @@ func (r *certificateRepo) GetByStudentAndCourse(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetCertificateByStudentAndCourse",
-				"certificate not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetCertificateByStudentAndCourse",
-			"failed to get certificate",
-			err,
-		)
+		return nil, handleError(err, "GetCertificateByStudentAndCourse", "failed to get certificate")
 	}
 
 	return &certificate, nil

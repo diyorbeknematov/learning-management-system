@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -66,30 +64,7 @@ func (r *attemptRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateQuizAttempt",
-				"attempt number already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateQuizAttempt",
-				"student or quiz not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateQuizAttempt",
-			"failed to create quiz attempt",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateQuizAttempt", "failed to create quiz attempt")
 	}
 
 	return id, nil
@@ -119,21 +94,7 @@ func (r *attemptRepo) GetByID(
 	err := scanAttempt(r.db.QueryRow(ctx, query, id), &attempt)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetQuizAttemptByID",
-				"quiz attempt not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetQuizAttemptByID",
-			"failed to get quiz attempt",
-			err,
-		)
+		return nil, handleError(err, "GetQuizAttemptByID", "failed to get quiz attempt")
 	}
 
 	return &attempt, nil
@@ -308,30 +269,7 @@ func (r *attemptRepo) CreateAnswer(
 	)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return apperror.Conflict(
-				"repository",
-				"CreateAttemptAnswer",
-				"answer already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return apperror.NotFound(
-				"repository",
-				"CreateAttemptAnswer",
-				"attempt, question or option not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return apperror.Internal(
-			"repository",
-			"CreateAttemptAnswer",
-			"failed to create attempt answer",
-			err,
-		)
+		return handleError(err, "CreateAttemptAnswer", "failed to create attempt answer")
 	}
 
 	return nil

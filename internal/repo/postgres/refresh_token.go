@@ -2,12 +2,10 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 type refreshTokenRepo struct {
@@ -90,21 +88,7 @@ func (r *refreshTokenRepo) GetByTokenHash(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.Unauthorized(
-				"repository",
-				"GetRefreshTokenByTokenHash",
-				"refresh token not found",
-				apperror.ErrUnauthorized,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetRefreshTokenByTokenHash",
-			"failed to get refresh token by token hash",
-			err,
-		)
+		return nil, handleError(err, "GetRefreshTokenByTokenHash", "failed to get refresh token by token hash")
 	}
 
 	return &token, nil

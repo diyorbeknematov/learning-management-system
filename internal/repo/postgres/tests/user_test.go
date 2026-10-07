@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/diyorbeknematov/lms/internal/models"
-	"github.com/diyorbeknematov/lms/internal/repository"
+	"github.com/diyorbeknematov/lms/internal/repo"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -333,7 +333,7 @@ func TestRepository_WithTx_RollbackOnError(t *testing.T) {
 
 	username := "tx_" + uuid.NewString()
 
-	err := tc.Repo.WithTx(ctx, func(txRepo *repository.Repository) error {
+	err := tc.Repo.WithTx(ctx, func(txRepo *repo.Repository) error {
 		_, err := txRepo.User.Create(ctx, models.CreateUser{
 			RoleID:    roleID.String(),
 			FirstName: "Tx",

@@ -2,14 +2,12 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -62,30 +60,7 @@ func (r *enrollmentRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateEnrollment",
-				"student is already enrolled in this course",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateEnrollment",
-				"course or student not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateEnrollment",
-			"failed to create enrollment",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateEnrollment", "failed to create enrollment")
 	}
 
 	return id, nil
@@ -113,21 +88,7 @@ func (r *enrollmentRepo) GetByID(
 	err := scanEnrollment(r.db.QueryRow(ctx, query, id), &enrollment)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetEnrollmentByID",
-				"enrollment not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetEnrollmentByID",
-			"failed to get enrollment",
-			err,
-		)
+		return nil, handleError(err, "GetEnrollmentByID", "failed to get enrollment")
 	}
 
 	return &enrollment, nil
@@ -159,21 +120,7 @@ func (r *enrollmentRepo) GetByStudentAndCourse(
 	err := scanEnrollment(r.db.QueryRow(ctx, query, studentID, courseID), &enrollment)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetEnrollmentByStudentAndCourse",
-				"enrollment not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetEnrollmentByStudentAndCourse",
-			"failed to get enrollment",
-			err,
-		)
+		return nil, handleError(err, "GetEnrollmentByStudentAndCourse", "failed to get enrollment")
 	}
 
 	return &enrollment, nil

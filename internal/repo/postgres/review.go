@@ -2,12 +2,10 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -67,39 +65,7 @@ func (r *reviewRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateReview",
-				"student already reviewed this course",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsCheckViolation(err) {
-			return uuid.Nil, apperror.InvalidInput(
-				"repository",
-				"CreateReview",
-				"rating must be between 1 and 5",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateReview",
-				"student or course not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateReview",
-			"failed to create review",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateReview", "failed to create review")
 	}
 
 	return id, nil
@@ -129,21 +95,7 @@ func (r *reviewRepo) GetByID(
 	err := scanReview(r.db.QueryRow(ctx, query, id), &review)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetReviewByID",
-				"review not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetReviewByID",
-			"failed to get review",
-			err,
-		)
+		return nil, handleError(err, "GetReviewByID", "failed to get review")
 	}
 
 	return &review, nil
@@ -261,6 +213,34 @@ func (r *reviewRepo) GetAverageRating(
 	return average, nil
 }
 
+// GetInstructorAverageRating returns the average rating of all reviews of the
+// courses of an instructor, 0 when there are none.
+func (r *reviewRepo) GetInstructorAverageRating(
+	ctx context.Context,
+	instructorID uuid.UUID,
+) (float64, error) {
+	query := `
+		SELECT COALESCE(AVG(rv.rating), 0)::float8
+		FROM reviews rv
+		JOIN courses c ON c.id = rv.course_id
+		WHERE c.instructor_id = $1;
+	`
+
+	var average float64
+
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		instructorID,
+	).Scan(&average)
+
+	if err != nil {
+		return 0, handleError(err, "GetInstructorAverageRating", "failed to get instructor rating")
+	}
+
+	return average, nil
+}
+
 func (r *reviewRepo) Update(
 	ctx context.Context,
 	review models.UpdateReview,
@@ -283,21 +263,7 @@ func (r *reviewRepo) Update(
 	)
 
 	if err != nil {
-		if pgerr.IsCheckViolation(err) {
-			return nil, apperror.InvalidInput(
-				"repository",
-				"UpdateReview",
-				"rating must be between 1 and 5",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateReview",
-			"failed to update review",
-			err,
-		)
+		return nil, handleError(err, "UpdateReview", "failed to update review")
 	}
 
 	if result.RowsAffected() == 0 {

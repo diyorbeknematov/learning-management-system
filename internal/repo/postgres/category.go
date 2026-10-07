@@ -2,16 +2,13 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 type categoryRepo struct {
@@ -46,21 +43,7 @@ func (r *categoryRepo) Create(ctx context.Context, category models.CreateCategor
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateCategory",
-				"category name already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateCategory",
-			"failed to create category",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateCategory", "failed to create category")
 	}
 
 	return id, nil
@@ -97,21 +80,7 @@ func (r *categoryRepo) GetByID(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetCategoryByID",
-				"category not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetCategoryByID",
-			"failed to get category",
-			err,
-		)
+		return nil, handleError(err, "GetCategoryByID", "failed to get category")
 	}
 
 	return &category, nil
@@ -269,30 +238,7 @@ func (r *categoryRepo) Update(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateCategory",
-				"category not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		if pgerr.IsUniqueViolation(err) {
-			return nil, apperror.Conflict(
-				"repository",
-				"UpdateCategory",
-				"category name already exists",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateCategory",
-			"failed to update category",
-			err,
-		)
+		return nil, handleError(err, "UpdateCategory", "failed to update category")
 	}
 
 	return &updatedCategory, nil

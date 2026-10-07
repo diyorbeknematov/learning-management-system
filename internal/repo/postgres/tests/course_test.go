@@ -62,7 +62,7 @@ func TestCourseRepo_Create_InvalidCategory(t *testing.T) {
 
 	appErr, ok := apperror.As(err)
 	require.True(t, ok)
-	require.Equal(t, apperror.CodeInvalidInput, appErr.Code)
+	require.Equal(t, apperror.CodeNotFound, appErr.Code)
 }
 
 func TestCourseRepo_CreateLearningOutcome(t *testing.T) {

@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	"github.com/diyorbeknematov/lms/internal/config"
-	"github.com/diyorbeknematov/lms/internal/repository"
-	"github.com/diyorbeknematov/lms/internal/repository/postgres"
+	"github.com/diyorbeknematov/lms/internal/repo"
+	"github.com/diyorbeknematov/lms/internal/repo/postgres"
 	"github.com/stretchr/testify/require"
 )
 
 type TestContext struct {
 	DB   *postgres.Postgres
-	Repo *repository.Repository
+	Repo *repo.Repository
 }
 
 func TestNew(t *testing.T) {
@@ -38,7 +38,7 @@ func setupTest(t *testing.T) *TestContext {
 		db.Close()
 	})
 
-	repo := repository.NewRepository(db.Pool)
+	repo := repo.NewRepository(db.Pool)
 
 	return &TestContext{
 		DB:   db,

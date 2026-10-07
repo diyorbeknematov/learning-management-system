@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -73,39 +71,7 @@ func (r *quizRepo) Create(
 	).Scan(&id)
 
 	if err != nil {
-		if pgerr.IsUniqueViolation(err) {
-			return uuid.Nil, apperror.Conflict(
-				"repository",
-				"CreateQuiz",
-				"course already has a final quiz",
-				apperror.ErrAlreadyExists,
-			)
-		}
-
-		if pgerr.IsCheckViolation(err) {
-			return uuid.Nil, apperror.InvalidInput(
-				"repository",
-				"CreateQuiz",
-				"invalid quiz owner, time limit, threshold or attempts",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		if pgerr.IsForeignKeyViolation(err) {
-			return uuid.Nil, apperror.NotFound(
-				"repository",
-				"CreateQuiz",
-				"course or module not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return uuid.Nil, apperror.Internal(
-			"repository",
-			"CreateQuiz",
-			"failed to create quiz",
-			err,
-		)
+		return uuid.Nil, handleError(err, "CreateQuiz", "failed to create quiz")
 	}
 
 	return id, nil
@@ -137,21 +103,7 @@ func (r *quizRepo) GetByID(
 	err := scanQuiz(r.db.QueryRow(ctx, query, id), &quiz)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetQuizByID",
-				"quiz not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetQuizByID",
-			"failed to get quiz",
-			err,
-		)
+		return nil, handleError(err, "GetQuizByID", "failed to get quiz")
 	}
 
 	return &quiz, nil
@@ -298,30 +250,7 @@ func (r *quizRepo) Update(
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"UpdateQuiz",
-				"quiz not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		if pgerr.IsCheckViolation(err) {
-			return nil, apperror.InvalidInput(
-				"repository",
-				"UpdateQuiz",
-				"invalid time limit, threshold or attempts",
-				apperror.ErrInvalidInput,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"UpdateQuiz",
-			"failed to update quiz",
-			err,
-		)
+		return nil, handleError(err, "UpdateQuiz", "failed to update quiz")
 	}
 
 	return &updatedQuiz, nil

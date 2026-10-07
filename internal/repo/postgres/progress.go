@@ -2,14 +2,12 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/diyorbeknematov/lms/pkg/helpers"
-	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -94,21 +92,7 @@ func (r *progressRepo) Set(
 	)
 
 	if err != nil {
-		if pgerr.IsForeignKeyViolation(err) {
-			return nil, apperror.NotFound(
-				"repository",
-				"SetLessonProgress",
-				"student or lesson not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"SetLessonProgress",
-			"failed to set lesson progress",
-			err,
-		)
+		return nil, handleError(err, "SetLessonProgress", "failed to set lesson progress")
 	}
 
 	return &result, nil
@@ -138,21 +122,7 @@ func (r *progressRepo) GetByLesson(
 	err := scanProgress(r.db.QueryRow(ctx, query, studentID, lessonID), &progress)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.NotFound(
-				"repository",
-				"GetLessonProgress",
-				"lesson progress not found",
-				apperror.ErrNotFound,
-			)
-		}
-
-		return nil, apperror.Internal(
-			"repository",
-			"GetLessonProgress",
-			"failed to get lesson progress",
-			err,
-		)
+		return nil, handleError(err, "GetLessonProgress", "failed to get lesson progress")
 	}
 
 	return &progress, nil

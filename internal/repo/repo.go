@@ -1,11 +1,11 @@
-package repository
+package repo
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/diyorbeknematov/lms/internal/models"
-	"github.com/diyorbeknematov/lms/internal/repository/postgres"
+	"github.com/diyorbeknematov/lms/internal/repo/postgres"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -82,6 +82,9 @@ type User interface {
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 	ExistsByUsername(ctx context.Context, username string) (bool, error)
 	GetByUsername(ctx context.Context, username string) (*models.GetByUsername, error)
+	GetByEmail(ctx context.Context, email string) (*models.User, error)
+	GetPasswordHash(ctx context.Context, id string) (string, error)
+	GetRoleByName(ctx context.Context, name string) (*models.Role, error)
 	Create(context.Context, models.CreateUser) (uuid.UUID, error)
 	Update(context.Context, models.UpdateUser) (*models.User, error)
 	UpdateStatus(context.Context, string, string,
@@ -215,6 +218,7 @@ type Review interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Review, error)
 	GetListByCourseID(ctx context.Context, courseID uuid.UUID, filter models.ReviewFilter) ([]models.Review, int, error)
 	GetAverageRating(ctx context.Context, courseID uuid.UUID) (float64, error)
+	GetInstructorAverageRating(ctx context.Context, instructorID uuid.UUID) (float64, error)
 	Update(ctx context.Context, review models.UpdateReview) (*models.Review, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }

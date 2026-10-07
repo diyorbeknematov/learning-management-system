@@ -122,3 +122,45 @@ func TestDelete_Missing(t *testing.T) {
 
 	require.NoError(t, m.Delete(context.Background(), "avatars/missing.png"))
 }
+
+func TestCopy(t *testing.T) {
+	m := setupMinIO(t)
+
+	ctx := context.Background()
+	source := minio.TempPrefix + minio.NewObjectKey(models.UploadPurposeMaterial, "a.pdf")
+	destination := "materials/copied.pdf"
+
+	_, err := m.Client.PutObject(ctx, m.Bucket, source, bytes.NewReader([]byte("content")), 7, clientMinIO.PutObjectOptions{ContentType: "application/pdf"})
+	require.NoError(t, err)
+
+	require.NoError(t, m.Copy(ctx, source, destination))
+
+	info, err := m.Stat(ctx, destination)
+	require.NoError(t, err)
+	require.Equal(t, int64(7), info.Size)
+	require.Equal(t, "application/pdf", info.ContentType)
+
+	_, err = m.Stat(ctx, source)
+	require.NoError(t, err, "the source stays")
+}
+
+func TestCopy_MissingSource(t *testing.T) {
+	m := setupMinIO(t)
+
+	err := m.Copy(context.Background(), "tmp/avatars/missing.png", "avatars/missing.png")
+
+	appErr, ok := apperror.As(err)
+	require.True(t, ok)
+	require.Equal(t, apperror.CodeInternal, appErr.Code)
+}
+
+func TestNew_ExpiresTheTemporaryFolder(t *testing.T) {
+	m := setupMinIO(t)
+
+	rules, err := m.Client.GetBucketLifecycle(context.Background(), m.Bucket)
+	require.NoError(t, err)
+	require.Len(t, rules.Rules, 1)
+	require.Equal(t, minio.TempPrefix, rules.Rules[0].RuleFilter.Prefix)
+	require.Equal(t, "Enabled", rules.Rules[0].Status)
+	require.EqualValues(t, 1, rules.Rules[0].Expiration.Days)
+}

@@ -13,6 +13,8 @@ import (
 // The finance tests use dates far in the past so the amounts of other data in
 // the database cannot change the totals.
 var (
+	// Test packages run at the same time on one database, so each has a year
+	// of its own: these tests use 2001 (see also service/finance, which uses 2002).
 	financeFirstDay  = time.Date(2001, 5, 10, 12, 0, 0, 0, time.UTC)
 	financeSecondDay = time.Date(2001, 5, 11, 12, 0, 0, 0, time.UTC)
 	financeFrom      = time.Date(2001, 5, 1, 0, 0, 0, 0, time.UTC)
