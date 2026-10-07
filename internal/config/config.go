@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -28,8 +29,16 @@ type DBConfig struct {
 type RedisConfig struct {
 	Host     string
 	Port     int
+	Username string
 	Password string
-	DB       int
+}
+
+type SMTPConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	From     string
 }
 
 type MinIOConfig struct {
@@ -42,10 +51,20 @@ type MinIOConfig struct {
 }
 
 type LoggerConfig struct {
-	Level  string
-	Env    string
-	FilePath   string
-	ToFile bool
+	Level    string
+	Env      string
+	FilePath string
+	ToFile   bool
+}
+
+// AdminConfig is the first SuperAdmin. When a password is set and the system
+// has no SuperAdmin yet, one is created at start-up. It is empty by default.
+type AdminConfig struct {
+	Username  string
+	Email     string
+	Password  string
+	FirstName string
+	LastName  string
 }
 
 type Config struct {
@@ -53,13 +72,28 @@ type Config struct {
 	DB     DBConfig
 	Redis  RedisConfig
 	MinIO  MinIOConfig
+	SMTP   SMTPConfig
 	Logger LoggerConfig
+	Admin  AdminConfig
 
-	AccessTokenSecret  string
-	RefreshTokenSecret string
+	TokenSecret string
 
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+	ResetTokenTTL   time.Duration
+
+	// ResetPasswordURL is the page of the frontend that takes the reset token.
+	ResetPasswordURL string
+	// CertificateVerifyURL is the public address that checks a certificate.
+	CertificateVerifyURL string
+	// CORSOrigins are the frontend addresses that may call the API.
+	CORSOrigins []string
+	// TrustedProxies are the reverse proxies in front of the API (addresses or
+	// networks like 10.0.0.0/8). Without any, the client address is the
+	// address of the connection.
+	TrustedProxies []string
+	// RateLimit turns the request limits on or off.
+	RateLimit bool
 }
 
 func Load() *Config {
@@ -87,7 +121,7 @@ func Load() *Config {
 			Host:     cast.ToString(coalesce("REDIS_HOST", "localhost")),
 			Port:     cast.ToInt(coalesce("REDIS_PORT", 6379)),
 			Password: cast.ToString(coalesce("REDIS_PASSWORD", "")),
-			DB:       cast.ToInt(coalesce("REDIS_DB", 0)),
+			Username: cast.ToString(coalesce("REDIS_USERNAME", "")),
 		},
 
 		MinIO: MinIOConfig{
@@ -99,18 +133,40 @@ func Load() *Config {
 			PresignedExpiry: cast.ToDuration(coalesce("MINIO_PRESIGNED_EXPIRY", "15m")),
 		},
 
-		Logger: LoggerConfig{
-			Level:  cast.ToString(coalesce("LOG_LEVEL", "info")),
-			Env:    cast.ToString(coalesce("APP_ENV", "dev")),
-			FilePath:   cast.ToString(coalesce("LOG_FILE_PATH", "logs/app.log")),
-			ToFile: cast.ToBool(coalesce("LOG_TO_FILE", true)),
+		Admin: AdminConfig{
+			Username:  cast.ToString(coalesce("ADMIN_USERNAME", "admin")),
+			Email:     cast.ToString(coalesce("ADMIN_EMAIL", "")),
+			Password:  cast.ToString(coalesce("ADMIN_PASSWORD", "")),
+			FirstName: cast.ToString(coalesce("ADMIN_FIRST_NAME", "Super")),
+			LastName:  cast.ToString(coalesce("ADMIN_LAST_NAME", "Admin")),
 		},
 
-		AccessTokenSecret:  cast.ToString(coalesce("ACCESS_TOKEN_SECRET", "access-secret")),
-		RefreshTokenSecret: cast.ToString(coalesce("REFRESH_TOKEN_SECRET", "refresh-secret")),
+		SMTP: SMTPConfig{
+			Host:     cast.ToString(coalesce("SMTP_HOST", "")),
+			Port:     cast.ToInt(coalesce("SMTP_PORT", 587)),
+			Username: cast.ToString(coalesce("SMTP_USERNAME", "")),
+			Password: cast.ToString(coalesce("SMTP_PASSWORD", "")),
+			From:     cast.ToString(coalesce("SMTP_FROM", "")),
+		},
+
+		Logger: LoggerConfig{
+			Level:    cast.ToString(coalesce("LOG_LEVEL", "info")),
+			Env:      cast.ToString(coalesce("APP_ENV", "dev")),
+			FilePath: cast.ToString(coalesce("LOG_FILE_PATH", "logs/app.log")),
+			ToFile:   cast.ToBool(coalesce("LOG_TO_FILE", true)),
+		},
+
+		TokenSecret: cast.ToString(coalesce("TOKEN_SECRET", "token-secret")),
 
 		AccessTokenTTL:  cast.ToDuration(coalesce("ACCESS_TOKEN_TTL", "15m")),
 		RefreshTokenTTL: cast.ToDuration(coalesce("REFRESH_TOKEN_TTL", "168h")),
+		ResetTokenTTL:   cast.ToDuration(coalesce("RESET_TOKEN_TTL", "15m")),
+
+		ResetPasswordURL:     cast.ToString(coalesce("RESET_PASSWORD_URL", "http://localhost:3000/reset-password")),
+		CertificateVerifyURL: cast.ToString(coalesce("CERTIFICATE_VERIFY_URL", "http://localhost:8080/api/v1/certificates/verify")),
+		CORSOrigins:          splitList(cast.ToString(coalesce("CORS_ORIGINS", "http://localhost:3000"))),
+		TrustedProxies:       splitList(cast.ToString(coalesce("TRUSTED_PROXIES", ""))),
+		RateLimit:            cast.ToBool(coalesce("RATE_LIMIT_ENABLED", true)),
 	}
 }
 
@@ -150,4 +206,17 @@ func coalesce(key string, defaultValue any) any {
 
 func (c ServerConfig) Address() string {
 	return net.JoinHostPort(c.Host, strconv.Itoa(c.Port))
+}
+
+// splitList splits a comma separated value and drops the empty parts.
+func splitList(value string) []string {
+	var items []string
+
+	for _, item := range strings.Split(value, ",") {
+		if item = strings.TrimSpace(item); item != "" {
+			items = append(items, item)
+		}
+	}
+
+	return items
 }

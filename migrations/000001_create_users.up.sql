@@ -48,3 +48,10 @@ WHERE deleted_at IS NULL;
 
 CREATE INDEX refresh_tokens_user_id_idx
 ON refresh_tokens (user_id);
+
+CREATE INDEX users_role_id_idx
+ON users (role_id)
+WHERE deleted_at IS NULL;
+
+CREATE INDEX refresh_tokens_expires_at_idx
+ON refresh_tokens (expires_at);

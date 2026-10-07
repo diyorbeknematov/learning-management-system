@@ -17,9 +17,9 @@ type RefreshToken struct {
 type RegisterRequest struct {
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
-	Username  string `json:"username" validate:"required,min=3"`
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=8"`
+	Username  string `json:"username" validate:"required,username"`
+	Email     string `json:"email" validate:"required,email,max=254"`
+	Password  string `json:"password" validate:"required,password"`
 }
 
 type LoginRequest struct {
@@ -46,15 +46,15 @@ type LoginResponse struct {
 }
 
 type ForgotPasswordRequest struct {
-	Email string `json:"email" validate:"required,email"`
+	Email string `json:"email" validate:"required,email,max=254"`
 }
 
 type ResetPasswordRequest struct {
 	Token       string `json:"token" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required,min=8"`
+	NewPassword string `json:"new_password" validate:"required,password"`
 }
 
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required,min=8"`
+	NewPassword string `json:"new_password" validate:"required,password"`
 }

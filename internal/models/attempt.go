@@ -41,7 +41,7 @@ type SubmitAnswer struct {
 
 type SubmitAttempt struct {
 	AttemptID uuid.UUID      `json:"-"`
-	Answers   []SubmitAnswer `json:"answers" validate:"required,dive"`
+	Answers   []SubmitAnswer `json:"answers" validate:"dive"`
 }
 
 type CompleteAttempt struct {
@@ -54,4 +54,25 @@ type CompleteAttempt struct {
 type AttemptDetail struct {
 	QuizAttempt
 	Answers []AttemptAnswer `json:"answers"`
+}
+
+// AttemptView is what a student gets when an attempt starts: the questions in
+// the random order of this attempt, without the right answers.
+type AttemptView struct {
+	QuizAttempt
+	Questions []Question `json:"questions"`
+}
+
+// QuestionResult tells whether the answer to one question was right. The right
+// options themselves are not shown.
+type QuestionResult struct {
+	QuestionID        uuid.UUID   `json:"question_id"`
+	Correct           bool        `json:"correct"`
+	SelectedOptionIDs []uuid.UUID `json:"selected_option_ids"`
+}
+
+// AttemptResult is the outcome of a submitted attempt.
+type AttemptResult struct {
+	QuizAttempt
+	Results []QuestionResult `json:"results"`
 }

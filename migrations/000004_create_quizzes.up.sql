@@ -53,6 +53,7 @@ CREATE TABLE question_options (
     question_id UUID NOT NULL REFERENCES questions(id),
     option_text TEXT NOT NULL,
     is_correct BOOLEAN NOT NULL DEFAULT FALSE,
+    position INT NOT NULL DEFAULT 1,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
@@ -81,3 +82,15 @@ CREATE TABLE attempt_answers (
 
     UNIQUE (attempt_id, question_id, option_id)
 );
+
+CREATE INDEX quizzes_module_id_idx
+ON quizzes (module_id)
+WHERE module_id IS NOT NULL
+  AND deleted_at IS NULL;
+
+CREATE INDEX question_options_question_id_idx
+ON question_options (question_id)
+WHERE deleted_at IS NULL;
+
+CREATE INDEX quiz_attempts_quiz_id_idx
+ON quiz_attempts (quiz_id);

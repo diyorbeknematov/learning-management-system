@@ -33,3 +33,15 @@ CREATE TABLE instructor_payouts (
         (type = 'fixed' AND value >= 0)
     )
 );
+
+CREATE INDEX payments_paid_at_idx
+ON payments (paid_at);
+
+CREATE INDEX instructor_payouts_course_id_idx
+ON instructor_payouts (course_id);
+
+CREATE INDEX instructor_payouts_instructor_id_idx
+ON instructor_payouts (instructor_id);
+
+CREATE INDEX instructor_payouts_created_at_idx
+ON instructor_payouts (created_at);

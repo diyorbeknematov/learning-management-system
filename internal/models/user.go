@@ -14,6 +14,7 @@ type User struct {
 	Email     string    `db:"email" json:"email"`
 	RoleID    uuid.UUID `db:"role_id" json:"role_id"`
 	Avatar    *string   `db:"avatar" json:"avatar"`
+	AvatarURL *string   `db:"-" json:"avatar_url"`
 	Bio       *string   `db:"bio" json:"bio"`
 	RoleName  string    `db:"role_name" json:"role_name"`
 	Password  string    `db:"password" json:"-"`
@@ -48,14 +49,15 @@ type CreateUser struct {
 }
 
 type UpdateUser struct {
-	ID        uuid.UUID `db:"id" json:"id"`
-	FirstName *string   `db:"first_name" json:"first_name"`
-	LastName  *string   `db:"last_name" json:"last_name"`
-	Username  *string   `db:"username" json:"username"`
-	Email     *string   `db:"email" json:"email"`
-	Avatar    *string   `db:"avatar" json:"avatar"`
-	Bio       *string   `db:"bio" json:"bio"`
-	Password  *string   `db:"password" json:"-"`
+	ID        uuid.UUID  `db:"id" json:"id"`
+	FirstName *string    `db:"first_name" json:"first_name"`
+	LastName  *string    `db:"last_name" json:"last_name"`
+	Username  *string    `db:"username" json:"username"`
+	Email     *string    `db:"email" json:"email"`
+	Avatar    *string    `db:"avatar" json:"avatar"`
+	Bio       *string    `db:"bio" json:"bio"`
+	Password  *string    `db:"password" json:"-"`
+	RoleID    *uuid.UUID `db:"role_id" json:"-"`
 }
 
 type UpdateUserStatus struct {
@@ -65,8 +67,41 @@ type UpdateUserStatus struct {
 
 type UserFilter struct {
 	Search   *string `form:"search" json:"search"`
-	RoleName *string `form:"role" json:"role"`
-	Status   *string `form:"status" json:"status"`
+	RoleName *string `form:"role" json:"role" validate:"omitempty,oneof=SuperAdmin Instructor Student"`
+	Status   *string `form:"status" json:"status" validate:"omitempty,oneof=active blocked"`
 	Limit    int     `form:"limit" json:"limit"`
 	Page     int     `form:"page" json:"page"`
+}
+
+type CreateUserRequest struct {
+	FirstName string  `json:"first_name" validate:"required"`
+	LastName  string  `json:"last_name" validate:"required"`
+	Username  string  `json:"username" validate:"required,username"`
+	Email     string  `json:"email" validate:"required,email,max=254"`
+	Password  string  `json:"password" validate:"required,password"`
+	Role      string  `json:"role" validate:"required,oneof=SuperAdmin Instructor Student"`
+	Avatar    *string `json:"avatar"`
+	Bio       *string `json:"bio"`
+}
+
+// UpdateUserRequest is what a SuperAdmin can change on any user.
+type UpdateUserRequest struct {
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
+	Username  *string `json:"username" validate:"omitempty,username"`
+	Email     *string `json:"email" validate:"omitempty,email,max=254"`
+	Role      *string `json:"role" validate:"omitempty,oneof=SuperAdmin Instructor Student"`
+	Avatar    *string `json:"avatar"`
+	Bio       *string `json:"bio"`
+}
+
+// UpdateMeRequest is what users can change on their own profile. The role is
+// not here, so nobody can promote themselves.
+type UpdateMeRequest struct {
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
+	Username  *string `json:"username" validate:"omitempty,username"`
+	Email     *string `json:"email" validate:"omitempty,email,max=254"`
+	Avatar    *string `json:"avatar"`
+	Bio       *string `json:"bio"`
 }

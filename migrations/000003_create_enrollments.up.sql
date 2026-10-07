@@ -29,3 +29,10 @@ CREATE TABLE lesson_progress (
 
     UNIQUE (student_id, lesson_id)
 );
+
+CREATE INDEX enrollments_course_id_idx
+ON enrollments (course_id)
+WHERE deleted_at IS NULL;
+
+CREATE INDEX lesson_progress_lesson_id_idx
+ON lesson_progress (lesson_id);

@@ -10,3 +10,9 @@ CREATE TABLE certificates (
 
     UNIQUE (student_id, course_id)
 );
+
+CREATE INDEX certificates_course_id_idx
+ON certificates (course_id);
+
+CREATE INDEX certificates_created_at_idx
+ON certificates (created_at);

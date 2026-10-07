@@ -39,11 +39,11 @@ type CreateQuiz struct {
 
 type UpdateQuiz struct {
 	ID            uuid.UUID `db:"id" json:"-"`
-	Title         *string   `db:"title" json:"title"`
+	Title         *string   `db:"title" json:"title" validate:"omitempty,min=1"`
 	Description   *string   `db:"description" json:"description"`
-	TimeLimit     *int      `db:"time_limit" json:"time_limit"`
-	PassThreshold *int      `db:"pass_threshold" json:"pass_threshold"`
-	MaxAttempts   *int      `db:"max_attempts" json:"max_attempts"`
+	TimeLimit     *int      `db:"time_limit" json:"time_limit" validate:"omitempty,gt=0"`
+	PassThreshold *int      `db:"pass_threshold" json:"pass_threshold" validate:"omitempty,gte=0,lte=100"`
+	MaxAttempts   *int      `db:"max_attempts" json:"max_attempts" validate:"omitempty,gt=0"`
 }
 
 // IsCorrect is nil for students so the answer key is never exposed.
@@ -67,6 +67,7 @@ type Question struct {
 
 type CreateQuestionOption struct {
 	QuestionID uuid.UUID `json:"-"`
+	Position   int       `json:"-"`
 	OptionText string    `json:"option_text" validate:"required"`
 	IsCorrect  bool      `json:"is_correct"`
 }
@@ -81,8 +82,19 @@ type CreateQuestion struct {
 
 type UpdateQuestion struct {
 	ID          uuid.UUID               `db:"id" json:"-"`
-	Text        *string                 `db:"text" json:"text"`
-	Type        *QuestionType           `db:"type" json:"type"`
-	OrderNumber *int                    `db:"order_number" json:"order_number"`
-	Options     *[]CreateQuestionOption `db:"-" json:"options"`
+	Text        *string                 `db:"text" json:"text" validate:"omitempty,min=1"`
+	Type        *QuestionType           `db:"type" json:"type" validate:"omitempty,oneof=single_choice multiple_choice true_false"`
+	OrderNumber *int                    `db:"order_number" json:"order_number" validate:"omitempty,min=1"`
+	Options     *[]CreateQuestionOption `db:"-" json:"options" validate:"omitempty,min=2,dive"`
+}
+
+// CreateQuestionRequest adds a question to a quiz. Without OrderNumber the
+// question goes to the end; with it, the question takes that place and the
+// following ones move down. The order matters only to the author: a student
+// sees the questions in a random order.
+type CreateQuestionRequest struct {
+	Text        string                 `json:"text" validate:"required"`
+	Type        QuestionType           `json:"type" validate:"required,oneof=single_choice multiple_choice true_false"`
+	OrderNumber *int                   `json:"order_number" validate:"omitempty,min=1"`
+	Options     []CreateQuestionOption `json:"options" validate:"required,min=2,dive"`
 }

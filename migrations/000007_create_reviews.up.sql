@@ -11,3 +11,6 @@ CREATE TABLE reviews (
 
     UNIQUE (student_id, course_id)
 );
+
+CREATE INDEX reviews_course_id_idx
+ON reviews (course_id);

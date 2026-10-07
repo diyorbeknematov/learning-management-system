@@ -15,13 +15,13 @@ type Category struct {
 }
 
 type CreateCategory struct {
-	Name        string  `db:"name" json:"name" validate:"required"`
+	Name        string  `db:"name" json:"name" validate:"required,max=100"`
 	Description *string `db:"description" json:"description"`
 }
 
 type UpdateCategory struct {
 	ID          uuid.UUID `db:"id" json:"id"`
-	Name        *string   `db:"name" json:"name"`
+	Name        *string   `db:"name" json:"name" validate:"omitempty,min=1,max=100"`
 	Description *string   `db:"description" json:"description"`
 }
 

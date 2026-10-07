@@ -14,6 +14,7 @@ const (
 	CodeUnauthorized ErrorCode = "UNAUTHORIZED"
 	CodeForbidden    ErrorCode = "FORBIDDEN"
 	CodeConflict     ErrorCode = "CONFLICT"
+	CodeTooMany      ErrorCode = "TOO_MANY_REQUESTS"
 	CodeInternal     ErrorCode = "INTERNAL"
 )
 
@@ -32,6 +33,8 @@ var (
 	ErrUserNotFound  = errors.New("user not found")
 	ErrEmailExists   = errors.New("email already exists")
 	ErrAlreadyExists = errors.New("already exists")
+	ErrForbidden     = errors.New("forbidden")
+	ErrTooMany       = errors.New("too many requests")
 )
 
 func (e *AppError) Error() string {
@@ -57,6 +60,8 @@ func (e *AppError) HTTPStatus() int {
 		return http.StatusForbidden
 	case CodeConflict:
 		return http.StatusConflict
+	case CodeTooMany:
+		return http.StatusTooManyRequests
 	default:
 		return http.StatusInternalServerError
 	}
@@ -84,8 +89,16 @@ func InvalidInput(layer, op, message string, err error) error {
 	return Wrap(CodeInvalidInput, layer, op, message, err)
 }
 
+func Forbidden(layer, op, message string, err error) error {
+	return Wrap(CodeForbidden, layer, op, message, err)
+}
+
 func Unauthorized(layer, op, message string, err error) error {
 	return Wrap(CodeUnauthorized, layer, op, message, err)
+}
+
+func TooManyRequests(layer, op, message string, err error) error {
+	return Wrap(CodeTooMany, layer, op, message, err)
 }
 
 func Internal(layer, op, message string, err error) error {

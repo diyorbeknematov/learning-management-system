@@ -114,3 +114,32 @@ type ReviewReportRow struct {
 	ReviewGap      int       `db:"review_gap" json:"review_gap" csv:"review_gap"`
 	LowRating      bool      `db:"low_rating" json:"low_rating" csv:"low_rating"`
 }
+
+// The reports below carry extra data next to the main table. The CSV export has
+// only the main table (Rows).
+
+type EnrollmentReport struct {
+	Rows  []EnrollmentReportRow `json:"rows"`
+	Trend []TrendRow            `json:"trend"`
+}
+
+type StudentReport struct {
+	Rows   []StudentReportRow `json:"rows"`
+	Growth []TrendRow         `json:"growth"`
+}
+
+// ProgressReport has the funnel only when the report is made for one course.
+type ProgressReport struct {
+	Rows   []ProgressReportRow `json:"rows"`
+	Funnel []ProgressFunnelRow `json:"funnel"`
+}
+
+type QuizReport struct {
+	Rows                []QuizReportRow         `json:"rows"`
+	MostFailedQuestions []MostFailedQuestionRow `json:"most_failed_questions"`
+}
+
+type CertificateReport struct {
+	Rows  []CertificateReportRow `json:"rows"`
+	Trend []TrendRow             `json:"trend"`
+}

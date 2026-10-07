@@ -34,7 +34,7 @@ type UpdateEnrollmentStatus struct {
 }
 
 type EnrollmentFilter struct {
-	Status *EnrollmentStatus `form:"status" json:"status"`
+	Status *EnrollmentStatus `form:"status" json:"status" validate:"omitempty,oneof=active completed dropped"`
 	Limit  int               `form:"limit" json:"limit"`
 	Page   int               `form:"page" json:"page"`
 }
@@ -49,6 +49,7 @@ type MyEnrollment struct {
 	Enrollment
 	CourseTitle      string  `db:"course_title" json:"course_title"`
 	CourseCover      *string `db:"course_cover" json:"course_cover"`
+	CourseCoverURL   *string `db:"-" json:"course_cover_url"`
 	TotalLessons     int     `db:"total_lessons" json:"total_lessons"`
 	CompletedLessons int     `db:"completed_lessons" json:"completed_lessons"`
 	ProgressPercent  float64 `db:"progress_percent" json:"progress_percent"`

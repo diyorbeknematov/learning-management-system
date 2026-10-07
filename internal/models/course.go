@@ -50,6 +50,7 @@ type Course struct {
 	CategoryID       uuid.UUID               `db:"category_id" json:"category_id"`
 	Title            string                  `db:"title" json:"title"`
 	Cover            *string                 `db:"cover" json:"cover"`
+	CoverURL         *string                 `db:"-" json:"cover_url"`
 	Description      *string                 `db:"description" json:"description"`
 	Difficulty       *Difficulty             `db:"difficulty" json:"difficulty"`
 	TotalDuration    *int                    `db:"total_duration" json:"total_duration"`
@@ -101,19 +102,19 @@ type UpdateCourse struct {
 
 type UpdateCourseStatus struct {
 	ID     uuid.UUID    `db:"id" json:"id"`
-	Status CourseStatus `db:"status" json:"status" validate:"required"`
+	Status CourseStatus `db:"status" json:"status" validate:"required,oneof=draft published"`
 }
 
 type CourseFilter struct {
 	Search       *string       `form:"q" json:"q"`
 	CategoryID   *uuid.UUID    `form:"category_id" json:"category_id"`
 	InstructorID *uuid.UUID    `form:"instructor_id" json:"instructor_id"`
-	Difficulty   *Difficulty   `form:"difficulty" json:"difficulty"`
+	Difficulty   *Difficulty   `form:"difficulty" json:"difficulty" validate:"omitempty,oneof=beginner intermediate advanced"`
 	Language     *string       `form:"language" json:"language"`
-	MinRating    *float64      `form:"min_rating" json:"min_rating"`
-	PriceType    *string       `form:"price_type" json:"price_type"`
-	Status       *CourseStatus `form:"status" json:"status"`
-	Sort         string        `form:"sort" json:"sort"`
+	MinRating    *float64      `form:"min_rating" json:"min_rating" validate:"omitempty,gte=0,lte=5"`
+	PriceType    *string       `form:"price_type" json:"price_type" validate:"omitempty,oneof=free paid"`
+	Status       *CourseStatus `form:"status" json:"status" validate:"omitempty,oneof=draft published"`
+	Sort         string        `form:"sort" json:"sort" validate:"omitempty,oneof=popular rating newest price"`
 	Limit        int           `form:"limit" json:"limit"`
 	Page         int           `form:"page" json:"page"`
 }
@@ -133,6 +134,7 @@ type CourseInstructor struct {
 	FirstName string    `db:"first_name" json:"first_name"`
 	LastName  string    `db:"last_name" json:"last_name"`
 	Avatar    *string   `db:"avatar" json:"avatar"`
+	AvatarURL *string   `db:"-" json:"avatar_url"`
 	Bio       *string   `db:"bio" json:"bio"`
 	AvgRating float64   `db:"avg_rating" json:"avg_rating"`
 }
@@ -141,4 +143,39 @@ type CourseDetail struct {
 	CourseListItem
 	Instructor CourseInstructor `json:"instructor"`
 	Modules    []ModuleDetail   `json:"modules"`
+}
+
+// CreateCourseRequest is the body of a new course. InstructorID, PayoutType
+// and PayoutValue are used only when a SuperAdmin sends them.
+type CreateCourseRequest struct {
+	InstructorID     *uuid.UUID  `json:"instructor_id"`
+	CategoryID       uuid.UUID   `json:"category_id" validate:"required"`
+	Title            string      `json:"title" validate:"required"`
+	Cover            *string     `json:"cover"`
+	Description      *string     `json:"description"`
+	Difficulty       *Difficulty `json:"difficulty" validate:"omitempty,oneof=beginner intermediate advanced"`
+	TotalDuration    *int        `json:"total_duration" validate:"omitempty,min=0"`
+	Language         *string     `json:"language"`
+	Price            float64     `json:"price" validate:"min=0"`
+	PayoutType       *PayoutType `json:"payout_type" validate:"omitempty,oneof=percentage fixed"`
+	PayoutValue      *float64    `json:"payout_value" validate:"omitempty,min=0"`
+	LearningOutcomes []string    `json:"learning_outcomes"`
+	Requirements     []string    `json:"requirements"`
+}
+
+// UpdateCourseRequest changes only the fields that are sent. A sent list of
+// learning outcomes or requirements replaces the whole old list.
+type UpdateCourseRequest struct {
+	CategoryID       *uuid.UUID  `json:"category_id"`
+	Title            *string     `json:"title" validate:"omitempty,min=1"`
+	Cover            *string     `json:"cover"`
+	Description      *string     `json:"description"`
+	Difficulty       *Difficulty `json:"difficulty" validate:"omitempty,oneof=beginner intermediate advanced"`
+	TotalDuration    *int        `json:"total_duration" validate:"omitempty,min=0"`
+	Language         *string     `json:"language"`
+	Price            *float64    `json:"price" validate:"omitempty,min=0"`
+	PayoutType       *PayoutType `json:"payout_type" validate:"omitempty,oneof=percentage fixed"`
+	PayoutValue      *float64    `json:"payout_value" validate:"omitempty,min=0"`
+	LearningOutcomes *[]string   `json:"learning_outcomes"`
+	Requirements     *[]string   `json:"requirements"`
 }

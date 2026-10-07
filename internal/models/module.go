@@ -38,3 +38,12 @@ type UpdateModuleOrder struct {
 	ID          uuid.UUID `json:"-"`
 	OrderNumber int       `json:"order_number" validate:"required,min=1"`
 }
+
+// CreateModuleRequest adds a module to a course. Without OrderNumber the module
+// goes to the end; with it, the module takes that place and the following
+// modules move down.
+type CreateModuleRequest struct {
+	Title       string  `json:"title" validate:"required"`
+	Description *string `json:"description"`
+	OrderNumber *int    `json:"order_number" validate:"omitempty,min=1"`
+}
