@@ -1,8 +1,9 @@
-# Settings come from .env when it exists (copy .env.example to .env).
--include .env
-export
-
-DB_URL := postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
+# The app and the tests read .env themselves, and docker compose does too, so
+# this file does not include it: that would override values given on the
+# command line (POSTGRES_PORT=5435 make up). Only the migrations need the
+# database settings, and they load .env inside their own shell command.
+LOAD_ENV := set -a; [ -f .env ] && . ./.env; set +a;
+DB_URL := postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable
 
 .DEFAULT_GOAL := help
 
@@ -21,7 +22,7 @@ run: ## Run the API on this machine
 build: ## Build the binary into bin/lms
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o bin/lms ./cmd/main.go
 
-test: ## Run all tests (needs Postgres and Redis from .env; tests without them are skipped)
+test: ## Run all tests (they use the services of .env; tests without them are skipped)
 	go test -count=1 ./...
 
 vet: ## go vet
@@ -46,17 +47,17 @@ postman: swagger ## Generate the Postman collection and environment in docs/post
 # --- migrations (needs the migrate CLI: https://github.com/golang-migrate/migrate)
 
 mig-up: ## Apply all migrations
-	migrate -path ./migrations -database '$(DB_URL)' up
+	@$(LOAD_ENV) migrate -path ./migrations -database "$(DB_URL)" up
 
 mig-down: ## Roll back migrations: make mig-down n=1 (default 1)
-	migrate -path ./migrations -database '$(DB_URL)' down $(or $(n),1)
+	@$(LOAD_ENV) migrate -path ./migrations -database "$(DB_URL)" down $(or $(n),1)
 
 mig-version: ## Show the current migration version
-	migrate -path ./migrations -database '$(DB_URL)' version
+	@$(LOAD_ENV) migrate -path ./migrations -database "$(DB_URL)" version
 
 mig-force: ## Set the version after a failed migration: make mig-force v=3
 	@test -n "$(v)" || (echo "usage: make mig-force v=<version>"; exit 1)
-	migrate -path ./migrations -database '$(DB_URL)' force $(v)
+	@$(LOAD_ENV) migrate -path ./migrations -database "$(DB_URL)" force $(v)
 
 mig-create: ## Create a migration: make mig-create name=add_x
 	@test -n "$(name)" || (echo "usage: make mig-create name=<name>"; exit 1)
