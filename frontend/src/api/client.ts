@@ -116,10 +116,41 @@ const auth: Middleware = {
       return fetch(original)
     }
 
-    tokens.clear()
+    tokens.expire()
 
     return response
   },
 }
 
 api.use(auth)
+
+/**
+ * Downloads a file that needs the access token (a link in a plain <a> cannot
+ * send the Authorization header) and saves it with the name the server gives.
+ */
+export async function downloadFile(path: string, fallbackName: string): Promise<void> {
+  const send = () =>
+    fetch(`${baseUrl}${path}`, { headers: { Authorization: `Bearer ${tokens.access() ?? ''}` } })
+
+  let response = await send()
+
+  if (response.status === 401 && (await refresh())) response = await send()
+
+  if (!response.ok) {
+    const failure = (await response.json().catch(() => ({}))) as Failure
+
+    throw new ApiError(response.status, failure.error?.code ?? 'INTERNAL', failure.error?.message ?? response.statusText)
+  }
+
+  const disposition = response.headers.get('Content-Disposition') ?? ''
+  const name = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? fallbackName
+
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = name
+  link.click()
+
+  URL.revokeObjectURL(url)
+}

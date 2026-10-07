@@ -13,6 +13,15 @@ function read(key: string): string | null {
   }
 }
 
+const SESSION_ENDED = 'lms:session-ended'
+
+/** Calls fn when the session ends without the user asking (the tokens could not be renewed). */
+export function onSessionEnded(fn: () => void): () => void {
+  window.addEventListener(SESSION_ENDED, fn)
+
+  return () => window.removeEventListener(SESSION_ENDED, fn)
+}
+
 export const tokens = {
   access: () => read(ACCESS),
   refresh: () => read(REFRESH),
@@ -33,5 +42,11 @@ export const tokens = {
     } catch {
       // nothing to clear
     }
+  },
+
+  /** The tokens are no longer good: forget them and tell the app. */
+  expire() {
+    this.clear()
+    window.dispatchEvent(new Event(SESSION_ENDED))
   },
 }
