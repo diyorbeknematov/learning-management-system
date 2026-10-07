@@ -56,13 +56,19 @@ The application follows a layered architecture to keep HTTP handling, business l
 The backend uses a centralized layered structure:
 
 ```text
+cmd/                    entry point, app wiring (cmd/app)
 internal/
-├── handler/
-├── service/
-├── repository/
-├── middleware/
-└── models/
+├── api/                router, handler/, middleware/, authz/ (Casbin), response/, validation/
+├── service/            core/ (shared rules), account/, catalog/, learning/, files/, finance/
+├── repo/               repository interfaces; repo/postgres/ is the implementation
+├── storage/            minio/ (object storage), redis/
+├── models/             request, response and domain structs
+└── config/             environment configuration
+pkg/                    apperror, token (JWT), password, mailer, certpdf, csvexport, helpers, logger
+migrations/             SQL migrations
 ```
+
+Services call repositories only, never each other. Cross-service rules (who may manage a course, active enrollment, revocations) live in `service/core`.
 
 ### Handler
 
@@ -178,6 +184,10 @@ This provides refresh token rotation.
 Logout removes the corresponding refresh token from the database.
 
 Other active sessions remain unaffected.
+
+### Ending Sessions at Once
+
+An access token is a JWT and normally cannot be taken back before it expires. To end sessions immediately, the service writes `revoked_user:<id>` (the current time, living as long as an access token) when a user is **blocked, deleted, changes the password, gets a new role, or resets the password**. The `Authenticate` middleware rejects a token issued before that moment with `401` ("the session has ended, log in again"). Unblocking a user removes the note. Refresh tokens of the user are deleted at the same time.
 
 ### Password Reset
 
@@ -409,47 +419,43 @@ The repository provides transaction support, while the service determines where 
 
 # 9. Redis
 
-Redis is used as an additional infrastructure component.
+Redis holds short-lived data only; nothing in it is the source of truth.
 
-Primary use cases:
+Current use:
 
-* Caching
-* Temporary password reset data
-* Temporary authentication-related data
+| Key | Purpose | TTL |
+|---|---|---|
+| `password_reset:<hash>` | one-time reset token (read with GETDEL) | `RESET_TOKEN_TTL` |
+| `login_failures:<username>` | wrong-password counter; 5 failures lock the username | 15 min |
+| `forgot_password:<email>` | reset mails sent to one address; max 3 | 1 hour |
+| `rate:<route>:<ip>` | per-IP rate limit counters of the auth routes | route window |
+| `revoked_user:<id>` | moment the user's access tokens were ended | access token TTL |
+| `cache:<scope>:v<N>:<key>` | cached catalog answers (see Caching) | 5 min |
+| `cache_version:<scope>` | version of a cache scope | 24 h |
 
-The application follows a cache-aside approach.
+Counters use one Lua script (INCR + PEXPIRE on the first hit, returns the count and the time left). If Redis is down, the limits fail open (the request continues, a warning is logged); the revocation check fails closed (500).
 
-Example:
+### Caching
 
-```text
-GET /courses
-      │
-      ▼
-   Redis
-   /   \
- HIT   MISS
-  │      │
-  │      ▼
-  │   PostgreSQL
-  │      │
-  │      ▼
-  │    Redis
-  │
-  ▼
-Response
-```
+The public catalog is cached in Redis for 5 minutes (`core.Cache`, `service/core/cache.go`):
 
-Potential cache keys include:
+| Cached | Key | Who gets it from the cache |
+|---|---|---|
+| categories (list and one) | `cache:categories:v<N>:...` | everybody |
+| list of published courses (by filter) | `cache:courses:v<N>:list:<hash>` | everybody except the SuperAdmin and an instructor listing their own courses |
+| page of a published course | `cache:courses:v<N>:detail:<course id>` | everybody except the SuperAdmin (who also sees the payout) |
 
-```text
-courses:published
-course:{course_id}
-categories
-```
+Drafts and anything that depends on who asks are never cached, so a draft is never shown to the wrong person and the payout stays hidden.
 
-When relevant data changes, the corresponding cache is invalidated.
+**Invalidation by version.** Every scope (`courses`, `categories`) has a counter `cache_version:<scope>` inside the key of its entries. A change raises the counter, so the old entries are not found any more and expire by themselves; nothing is deleted one by one and there is no wildcard scan. The counter is raised after: course create/update/status/delete, module and lesson create/update/order/delete (the page has the syllabus), and category create/update/delete (courses show the category name).
 
-Rate limiting may also use Redis and is considered as a later infrastructure layer.
+**Not invalidated (bounded by the 5 minutes):** enrollment count and ratings on the course page, and the instructor's name or avatar. The cached page also holds presigned file links, so the TTL must stay shorter than `MINIO_PRESIGNED_EXPIRY` (15 minutes by default).
+
+**Redis failures never fail a request:** a read or write error is logged and the answer comes from the database.
+
+### Rate limiting
+
+`RateLimit` middleware limits the public auth routes per client IP (register 5/10 min, login 10/min, refresh 30/min, logout 30/min, forgot-password 3/15 min, reset-password 10/15 min). Over the limit: `429 TOO_MANY_REQUESTS` with a `Retry-After` header. `X-Forwarded-For` is trusted only when the sender is listed in `TRUSTED_PROXIES`; otherwise the socket address is used. `RATE_LIMIT_ENABLED=false` turns it off.
 
 ---
 
@@ -505,6 +511,12 @@ PostgreSQL
 ```
 
 The backend controls the object key and verifies the upload before storing the material metadata.
+
+### Temporary folder and cleanup
+
+A file is first uploaded to `tmp/<folder>/<id>.<ext>` (for example `tmp/avatars/…`). When the client attaches it (avatar, course cover, lesson material) the service checks its type and size, **copies** it to the permanent key (`avatars/<id>.<ext>`) and saves that key; the response contains the permanent key. A permanent key sent again (the current avatar) is checked as it is.
+
+The temporary copy is not deleted by the API. The bucket has a lifecycle rule (set at start-up) that removes everything under `tmp/` after 1 day, so files that were uploaded but never attached disappear by themselves, and a retry after a failed save still finds its file. When an avatar, a cover or a material is replaced or deleted, the API removes the old permanent file.
 
 Protected files are stored in a private bucket.
 
@@ -819,15 +831,20 @@ This includes:
 
 # 22. Deployment
 
-The initial deployment architecture is containerized using Docker.
-
-The development/initial deployment environment can contain:
+The environment is containerized with Docker (`Dockerfile`, `docker-compose.yml`).
 
 ```text
 Docker Compose
 │
-├── Go API
-├── PostgreSQL
-├── Redis
-├── MinIO
+├── app        Go API (multi-stage build, runs as a non-root user)
+├── migrate    applies migrations/ and exits; the app starts after it succeeded
+├── postgres   PostgreSQL 16
+├── redis      Redis 7
+├── minio      object storage (the app creates the bucket)
+└── mailpit    catches the emails of the API in development
 ```
+
+* The compose file is for development: `APP_ENV=dev`, simple passwords, Swagger UI on.
+* In production (`APP_ENV=prod`) the API refuses to start without a strong `TOKEN_SECRET` and an `SMTP_HOST`, and does not serve Swagger.
+* The first SuperAdmin is created at start-up from `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` when the system has none.
+* Behind a reverse proxy set `TRUSTED_PROXIES`, otherwise the rate limits see the proxy's address for every client.
