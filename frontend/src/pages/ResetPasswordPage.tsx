@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Lock } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Link, useSearchParams } from 'react-router'
 import { z } from 'zod'
 import { api, call } from '@/api/client'
 import { AuthCard } from '@/components/AuthCard'
 import { FormField } from '@/components/FormField'
+import { PasswordRules } from '@/components/PasswordRules'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/lib/query'
 import { applyApiErrors, password } from '@/lib/validation'
@@ -27,8 +29,11 @@ export default function ResetPasswordPage() {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<Values>({ resolver: zodResolver(schema) })
+
+  const typed = useWatch({ control, name: 'new_password' })
 
   async function submit(values: Values) {
     setFailure(null)
@@ -43,7 +48,14 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <AuthCard title="This link is not valid" footer={<Link to="/forgot-password" className="underline">Ask for a new link</Link>}>
+      <AuthCard
+        title="This link is not valid"
+        footer={
+          <Link to="/forgot-password" className="underline">
+            Ask for a new link
+          </Link>
+        }
+      >
         <p className="text-sm">The link has no token. Open the link from the email again.</p>
       </AuthCard>
     )
@@ -61,10 +73,26 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthCard title="Choose a new password" footer={<Link to="/forgot-password" className="underline">Ask for a new link</Link>}>
+    <AuthCard
+      title="Choose a new password"
+      footer={
+        <Link to="/forgot-password" className="underline">
+          Ask for a new link
+        </Link>
+      }
+    >
       <form onSubmit={handleSubmit(submit)} className="space-y-4" noValidate>
-        <FormField label="New password" type="password" autoComplete="new-password" error={errors.new_password} {...register('new_password')} />
-        <FormField label="Repeat the password" type="password" autoComplete="new-password" error={errors.confirm} {...register('confirm')} />
+        <FormField
+          label="New password"
+          large
+          icon={Lock}
+          type="password"
+          autoComplete="new-password"
+          error={errors.new_password}
+          {...register('new_password')}
+        />
+        <PasswordRules value={typed} />
+        <FormField label="Repeat the password" large icon={Lock} type="password" autoComplete="new-password" error={errors.confirm} {...register('confirm')} />
 
         {failure && (
           <p role="alert" className="text-sm text-destructive">

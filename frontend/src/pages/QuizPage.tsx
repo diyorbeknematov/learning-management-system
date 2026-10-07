@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, RotateCcw, Target, XCircle } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
@@ -213,18 +213,35 @@ export default function QuizPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">{data.title}</h1>
-        {data.description && <p className="text-muted-foreground">{data.description}</p>}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Badge variant="secondary">{data.time_limit} min</Badge>
-          <Badge variant="secondary">Pass: {data.pass_threshold}%</Badge>
-          <Badge variant="secondary">
-            Attempts: {used}/{data.max_attempts}
-          </Badge>
-          {passed && <Badge>Passed</Badge>}
+      <Card className="gap-0 overflow-hidden py-0">
+        <div className="bg-gradient-to-r from-primary to-indigo-500 px-6 py-8 text-primary-foreground">
+          <p className="text-xs font-semibold uppercase tracking-widest opacity-80">Quiz</p>
+          <h1 className="text-3xl font-bold tracking-tight">{data.title}</h1>
+          {data.description && <p className="mt-1 opacity-90">{data.description}</p>}
         </div>
-      </div>
+        <div className="grid grid-cols-3 divide-x border-b text-center">
+          {[
+            [Clock, `${data.time_limit} min`, 'Time'],
+            [Target, `${data.pass_threshold}%`, 'To pass'],
+            [RotateCcw, `${used} of ${data.max_attempts}`, 'Attempts used'],
+          ].map(([Icon, value, label]) => {
+            const I = Icon as typeof Clock
+
+            return (
+              <div key={label as string} className="space-y-0.5 px-2 py-4">
+                <I className="mx-auto size-5 text-primary" />
+                <p className="text-lg font-semibold">{value as string}</p>
+                <p className="text-xs text-muted-foreground">{label as string}</p>
+              </div>
+            )
+          })}
+        </div>
+        {passed && (
+          <p className="bg-emerald-50 px-6 py-3 text-sm font-medium text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
+            Passed: you can go on with the course.
+          </p>
+        )}
+      </Card>
 
       {active ? (
         <Taking

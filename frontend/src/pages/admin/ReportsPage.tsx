@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { downloadFile } from '@/api/client'
 import { api } from '@/api/client'
 import { DataTable, columnTitle } from '@/components/DataTable'
-import { DateRange } from '@/components/DateRange'
+import { DateRange, RangePresets } from '@/components/DateRange'
 import { PageHeader } from '@/components/PageHeader'
 import { Toolbar } from '@/components/Panels'
 import { NativeSelect } from '@/components/NativeSelect'
@@ -101,10 +101,10 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <PageHeader title="Reports" description="Numbers about students, courses, quizzes and money. Download any of them as a CSV file." />
 
-      <Toolbar>
+      <Toolbar className="border-0 bg-transparent p-0">
         <div className="space-y-1.5">
           <Label htmlFor="report">Report</Label>
-          <NativeSelect id="report" className="w-56" value={report} onChange={(e) => setReport(e.target.value as Report)}>
+          <NativeSelect id="report" className="h-10 w-56 bg-muted/50" value={report} onChange={(e) => setReport(e.target.value as Report)}>
             {reports.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
@@ -115,7 +115,8 @@ export default function ReportsPage() {
         <div className="grid w-80 grid-cols-2 gap-3">
           <DateRange from={range.from} to={range.to} onChange={setRange} />
         </div>
-        <Button variant="outline" className="ml-auto" disabled={busy} onClick={csv}>
+        <RangePresets from={range.from} to={range.to} onChange={setRange} />
+        <Button variant="outline" className="ml-auto h-10 px-4" disabled={busy} onClick={csv}>
           <Download /> {busy ? 'Preparing…' : 'Download CSV'}
         </Button>
       </Toolbar>

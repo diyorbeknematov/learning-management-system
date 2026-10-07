@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
@@ -38,7 +39,14 @@ export default function ForgotPasswordPage() {
 
   if (sentTo) {
     return (
-      <AuthCard title="Check your email" footer={<Link to="/login" className="underline">Back to log in</Link>}>
+      <AuthCard
+        title="Check your email"
+        footer={
+          <Link to="/login" className="underline">
+            Back to log in
+          </Link>
+        }
+      >
         <p className="text-sm">
           We sent a link to <strong>{sentTo}</strong>. It works for a short time and only once.
         </p>
@@ -50,10 +58,23 @@ export default function ForgotPasswordPage() {
     <AuthCard
       title="Forgot the password?"
       description="Enter your email and we will send you a link to choose a new one."
-      footer={<Link to="/login" className="underline">Back to log in</Link>}
+      footer={
+        <Link to="/login" className="underline">
+          Back to log in
+        </Link>
+      }
     >
       <form onSubmit={handleSubmit(submit)} className="space-y-4" noValidate>
-        <FormField label="Email" type="email" autoComplete="email" error={errors.email} {...register('email')} />
+        <FormField
+          label="Email"
+          large
+          icon={Mail}
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          error={errors.email}
+          {...register('email')}
+        />
 
         {failure && (
           <p role="alert" className="text-sm text-destructive">

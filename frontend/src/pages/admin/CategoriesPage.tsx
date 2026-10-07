@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { Plus, Tags } from 'lucide-react'
 import { useState } from 'react'
 import { api, call } from '@/api/client'
 import { useCategories } from '@/api/queries'
@@ -73,7 +73,14 @@ function Row({ category, onEdit }: { category: Category; onEdit: () => void }) {
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{category.name}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Tags className="size-4" />
+          </span>
+          <span className="font-medium">{category.name}</span>
+        </div>
+      </TableCell>
       <TableCell className="text-muted-foreground">{category.description || '—'}</TableCell>
       <TableCell className="text-muted-foreground">{formatDate(category.created_at)}</TableCell>
       <TableCell className="text-right">
@@ -104,7 +111,7 @@ export default function CategoriesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Categories"
-        description={categories.data ? `${plural(categories.data.total, 'category')}. Courses are grouped by them in the catalog.` : undefined}
+        description={categories.data ? `${plural(categories.data.total, 'category', 'categories')}. Courses are grouped by them in the catalog.` : undefined}
         actions={
           <Button onClick={() => setDialog({})}>
             <Plus /> New category

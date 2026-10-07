@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, call } from '@/api/client'
-import { DateRange } from '@/components/DateRange'
+import { DateRange, RangePresets } from '@/components/DateRange'
 import { PageHeader } from '@/components/PageHeader'
 import { Pagination } from '@/components/Pagination'
 import { TableCard, Toolbar } from '@/components/Panels'
@@ -16,6 +16,11 @@ export default function PaymentsPage() {
   const [range, setRange] = useState({ from: '', to: '' })
   const [page, setPage] = useState(1)
 
+  function change(next: { from: string; to: string }) {
+    setRange(next)
+    setPage(1)
+  }
+
   const payments = useQuery({
     queryKey: ['payments', range, page],
     queryFn: () => call(api.GET('/payments', { params: { query: { from: range.from || undefined, to: range.to || undefined, page, limit: LIMIT } } })),
@@ -29,17 +34,11 @@ export default function PaymentsPage() {
         description={payments.data ? `${plural(payments.data.total, 'payment')} in this period` : 'What students paid for the courses'}
       />
 
-      <Toolbar className="max-w-xl">
-        <div className="grid flex-1 grid-cols-2 gap-3">
-          <DateRange
-            from={range.from}
-            to={range.to}
-            onChange={(next) => {
-              setRange(next)
-              setPage(1)
-            }}
-          />
+      <Toolbar className="border-0 bg-transparent p-0">
+        <div className="grid w-80 grid-cols-2 gap-3">
+          <DateRange from={range.from} to={range.to} onChange={change} />
         </div>
+        <RangePresets from={range.from} to={range.to} onChange={change} />
       </Toolbar>
 
       {payments.isPending && <LoadingBlock />}

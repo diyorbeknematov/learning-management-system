@@ -7,7 +7,7 @@ DB_URL := postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmo
 
 .DEFAULT_GOAL := help
 
-.PHONY: help run build test vet fmt tidy check swagger postman seed \
+.PHONY: help run build test vet fmt tidy check swagger postman seed seed-spread \
 	mig-up mig-down mig-force mig-version mig-create \
 	up down logs reset
 
@@ -40,6 +40,9 @@ check: fmt vet test ## fmt + vet + test
 
 seed: ## Fill the running system with demo data (needs ADMIN_PASSWORD; SEED_API if the API is not on :8080)
 	@$(LOAD_ENV) go run ./cmd/seed
+
+seed-spread: ## Spread the demo payments over the last six months, so the charts have something to draw (docker compose only)
+	docker compose exec -T postgres sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -v ON_ERROR_STOP=1' < scripts/spread-demo-dates.sql
 
 # --- API documentation (needs swag: go install github.com/swaggo/swag/cmd/swag@v1.16.4)
 

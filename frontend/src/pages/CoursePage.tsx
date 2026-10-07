@@ -153,7 +153,7 @@ export default function CoursePage() {
         <Reviews courseId={courseId} canReview={Boolean(enrollment) && hasRole(user, 'Student')} />
       </div>
 
-      <aside className="order-first lg:sticky lg:top-20 lg:order-none lg:self-start">
+      <aside className="order-first space-y-5 lg:sticky lg:top-20 lg:order-none lg:self-start">
         <Card className="overflow-hidden pt-0 shadow-md">
           <CourseCover url={data.cover_url} title={data.title} className="h-44 w-full object-cover" />
           <CardContent className="space-y-3 pt-2">
@@ -167,6 +167,23 @@ export default function CoursePage() {
             {data.language && <p className="text-sm text-muted-foreground">Language: {data.language}</p>}
           </CardContent>
         </Card>
+
+        {instructor && (
+          <div className="space-y-3 px-1" aria-label="Instructor">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Instructor</p>
+            <div className="flex items-center gap-3">
+              <Avatar className="size-12">
+                <AvatarImage src={instructor.avatar_url} alt="" />
+                <AvatarFallback>{fullName(instructor).slice(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 space-y-0.5">
+                <p className="truncate font-medium">{fullName(instructor)}</p>
+                <Rating value={instructor.avg_rating} />
+              </div>
+            </div>
+            {instructor.bio && <p className="line-clamp-3 text-sm text-muted-foreground">{instructor.bio}</p>}
+          </div>
+        )}
       </aside>
     </div>
   )

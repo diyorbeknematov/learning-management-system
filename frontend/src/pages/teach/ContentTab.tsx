@@ -6,11 +6,11 @@ import { ConfirmButton } from '@/components/ConfirmButton'
 import { ErrorBlock, LoadingBlock } from '@/components/States'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { duration } from '@/lib/format'
+import { duration, plural } from '@/lib/format'
 import { useApiMutation } from '@/lib/mutations'
 import { MaterialsDialog } from './MaterialsDialog'
 
@@ -71,7 +71,17 @@ function LessonDialog({ moduleId, lesson, onClose, refresh }: { moduleId: string
   )
 }
 
-function ModuleDialog({ courseId, module, onClose, refresh }: { courseId: string; module?: { id?: string; title?: string; description?: string }; onClose: () => void; refresh: string[] }) {
+function ModuleDialog({
+  courseId,
+  module,
+  onClose,
+  refresh,
+}: {
+  courseId: string
+  module?: { id?: string; title?: string; description?: string }
+  onClose: () => void
+  refresh: string[]
+}) {
   const [title, setTitle] = useState(module?.title ?? '')
   const [description, setDescription] = useState(module?.description ?? '')
 
@@ -165,7 +175,7 @@ export function ContentTab({ courseId }: { courseId: string }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {course.data.lesson_count ?? 0} lessons in {modules.length} modules. A course needs at least one lesson before it can be published.
+          {plural(course.data.lesson_count, 'lesson')} in {plural(modules.length, 'module')}. A course needs at least one lesson before it can be published.
         </p>
         <Button onClick={() => setEditing({ kind: 'module' })}>
           <Plus /> Add a module
@@ -175,24 +185,41 @@ export function ContentTab({ courseId }: { courseId: string }) {
       {modules.length === 0 && <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">No modules yet.</p>}
 
       {modules.map((module, moduleIndex) => (
-        <Card key={module.id}>
-          <CardHeader className="flex-row items-center gap-2">
+        <Card key={module.id} className="gap-4 py-5">
+          <div className="flex items-center gap-2 px-5">
             <h3 className="flex-1 font-medium">
               {moduleIndex + 1}. {module.title}
             </h3>
-            <Button size="icon-sm" variant="ghost" aria-label="Move the module up" disabled={moduleIndex === 0 || moveModule.isPending} onClick={() => moveModule.mutate({ id: module.id!, order: moduleIndex })}>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label="Move the module up"
+              disabled={moduleIndex === 0 || moveModule.isPending}
+              onClick={() => moveModule.mutate({ id: module.id!, order: moduleIndex })}
+            >
               <ArrowUp />
             </Button>
-            <Button size="icon-sm" variant="ghost" aria-label="Move the module down" disabled={moduleIndex === modules.length - 1 || moveModule.isPending} onClick={() => moveModule.mutate({ id: module.id!, order: moduleIndex + 2 })}>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label="Move the module down"
+              disabled={moduleIndex === modules.length - 1 || moveModule.isPending}
+              onClick={() => moveModule.mutate({ id: module.id!, order: moduleIndex + 2 })}
+            >
               <ArrowDown />
             </Button>
             <Button size="icon-sm" variant="ghost" aria-label="Edit the module" onClick={() => setEditing({ kind: 'module', module })}>
               <Pencil />
             </Button>
-            <ConfirmButton title="Delete this module?" description="Its lessons and their materials are deleted too." onConfirm={() => deleteModule.mutate(module.id!)} pending={deleteModule.isPending}>
+            <ConfirmButton
+              title="Delete this module?"
+              description="Its lessons and their materials are deleted too."
+              onConfirm={() => deleteModule.mutate(module.id!)}
+              pending={deleteModule.isPending}
+            >
               Delete
             </ConfirmButton>
-          </CardHeader>
+          </div>
           <CardContent className="space-y-2">
             {module.lessons?.length === 0 && <p className="text-sm text-muted-foreground">No lessons yet.</p>}
 
@@ -211,16 +238,39 @@ export function ContentTab({ courseId }: { courseId: string }) {
                   <Button size="xs" variant="outline" onClick={() => setEditing({ kind: 'materials', lesson })}>
                     <FolderOpen /> Materials
                   </Button>
-                  <Button size="icon-xs" variant="ghost" aria-label="Move the lesson up" disabled={lessonIndex === 0 || moveLesson.isPending} onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex })}>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label="Move the lesson up"
+                    disabled={lessonIndex === 0 || moveLesson.isPending}
+                    onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex })}
+                  >
                     <ArrowUp />
                   </Button>
-                  <Button size="icon-xs" variant="ghost" aria-label="Move the lesson down" disabled={lessonIndex === (module.lessons?.length ?? 0) - 1 || moveLesson.isPending} onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex + 2 })}>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label="Move the lesson down"
+                    disabled={lessonIndex === (module.lessons?.length ?? 0) - 1 || moveLesson.isPending}
+                    onClick={() => moveLesson.mutate({ id: lesson.id!, order: lessonIndex + 2 })}
+                  >
                     <ArrowDown />
                   </Button>
-                  <Button size="icon-xs" variant="ghost" aria-label="Edit the lesson" onClick={() => setEditing({ kind: 'lesson', moduleId: module.id!, lesson })}>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label="Edit the lesson"
+                    onClick={() => setEditing({ kind: 'lesson', moduleId: module.id!, lesson })}
+                  >
                     <Pencil />
                   </Button>
-                  <ConfirmButton size="xs" title="Delete this lesson?" description="Its materials are deleted too." onConfirm={() => deleteLesson.mutate(lesson.id!)} pending={deleteLesson.isPending}>
+                  <ConfirmButton
+                    size="xs"
+                    title="Delete this lesson?"
+                    description="Its materials are deleted too."
+                    onConfirm={() => deleteLesson.mutate(lesson.id!)}
+                    pending={deleteLesson.isPending}
+                  >
                     Delete
                   </ConfirmButton>
                 </li>

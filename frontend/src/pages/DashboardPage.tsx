@@ -1,14 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Award, BookOpen, CheckCircle2, CircleDollarSign, Coins, FileEdit, GraduationCap, Star, TrendingUp, Users, Wallet } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { api, call } from '@/api/client'
 import { useMyEnrollments } from '@/api/queries'
 import { useAuth } from '@/auth/context'
 import { CourseCard, CourseCover } from '@/components/CourseCard'
-import { courseGrid } from '@/components/layout/grids'
+import { Carousel } from '@/components/Carousel'
+import { DateRange, RangePresets } from '@/components/DateRange'
+import { TableCard } from '@/components/Panels'
 import { StatCard } from '@/components/StatCard'
+import { StatusBadge } from '@/components/StatusBadge'
 import { ErrorBlock, LoadingBlock } from '@/components/States'
-import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -34,20 +37,20 @@ function Section({ title, link, children }: { title: string; link?: { to: string
 function Popular({ skip, title = 'Popular courses' }: { skip?: Set<string>; title?: string }) {
   const courses = useQuery({
     queryKey: ['courses', 'dashboard', 'popular'],
-    queryFn: () => call(api.GET('/courses', { params: { query: { sort: 'popular', limit: 8 } } })),
+    queryFn: () => call(api.GET('/courses', { params: { query: { status: 'published', sort: 'popular', limit: 14 } } })),
   })
 
-  const items = (courses.data?.items ?? []).filter((course) => !skip?.has(course.id!)).slice(0, 4)
+  const items = (courses.data?.items ?? []).filter((course) => !skip?.has(course.id!)).slice(0, 12)
 
   if (courses.isPending || items.length === 0) return null
 
   return (
     <Section title={title} link={{ to: '/courses', label: 'All courses' }}>
-      <div className={courseGrid}>
+      <Carousel label={title}>
         {items.map((course) => (
           <CourseCard key={course.id} course={course} />
         ))}
-      </div>
+      </Carousel>
     </Section>
   )
 }
@@ -134,17 +137,17 @@ function InstructorDashboard() {
         <StatCard label="Average rating" value={rating ? rating.toFixed(1) : 'No reviews yet'} icon={Star} tone="rose" />
       </div>
 
-      <Section title="Your courses" link={{ to: '/teach/courses', label: 'Manage all' }}>
-        {items.length === 0 ? (
+      <Section title="Your published courses" link={{ to: '/teach/courses', label: 'Manage all' }}>
+        {published.length === 0 ? (
           <Card className="items-center gap-3 border-dashed p-10 text-center">
-            <p className="font-medium">You have no courses yet</p>
+            <p className="font-medium">You have no published courses yet</p>
             <Link to="/teach/courses/new" className={buttonVariants()}>
-              Create the first course
+              Create a course
             </Link>
           </Card>
         ) : (
-          <div className={courseGrid}>
-            {items.slice(0, 10).map((course) => (
+          <Carousel label="Your published courses">
+            {published.slice(0, 20).map((course) => (
               <div key={course.id} className="relative">
                 <CourseCard course={course} />
                 <Link to={`/teach/courses/${course.id}`} className={buttonVariants({ size: 'sm', variant: 'secondary' }) + ' absolute right-3 top-3'}>
@@ -152,7 +155,7 @@ function InstructorDashboard() {
                 </Link>
               </div>
             ))}
-          </div>
+          </Carousel>
         )}
       </Section>
     </>
@@ -161,8 +164,16 @@ function InstructorDashboard() {
 
 function AdminDashboard() {
   const users = useQuery({ queryKey: ['users', 'count'], queryFn: () => call(api.GET('/users', { params: { query: { limit: 1 } } })) })
-  const courses = useQuery({ queryKey: ['courses', 'count'], queryFn: () => call(api.GET('/courses', { params: { query: { limit: 1 } } })) })
-  const payments = useQuery({ queryKey: ['payments', 'recent'], queryFn: () => call(api.GET('/payments', { params: { query: { limit: 6 } } })) })
+  const courses = useQuery({
+    queryKey: ['courses', 'count'],
+    queryFn: () => call(api.GET('/courses', { params: { query: { status: 'published', limit: 1 } } })),
+  })
+  const [range, setRange] = useState({ from: '', to: '' })
+  const payments = useQuery({
+    queryKey: ['payments', 'recent', range],
+    queryFn: () => call(api.GET('/payments', { params: { query: { from: range.from || undefined, to: range.to || undefined, limit: 6 } } })),
+    placeholderData: (previous) => previous,
+  })
   const finance = useQuery({ queryKey: ['finance', 'all'], queryFn: () => call(api.GET('/finance', { params: { query: { group_by: 'month' } } })) })
 
   const failed = [users, courses, payments, finance].find((query) => query.isError)
@@ -180,34 +191,49 @@ function AdminDashboard() {
         <StatCard label="Net profit" value={finance.data ? moneyExact(finance.data.net_profit) : '…'} icon={TrendingUp} to="/admin/finance" />
       </div>
 
-      <Section title="Latest payments" link={{ to: '/admin/payments', label: 'All payments' }}>
+      <section className="space-y-4" aria-label="Latest payments">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h2 className="text-xl font-semibold">Latest payments</h2>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="grid w-80 grid-cols-2 gap-3">
+              <DateRange from={range.from} to={range.to} onChange={setRange} />
+            </div>
+            <Link to="/admin/payments" className="pb-2 text-sm font-medium text-primary hover:underline">
+              All payments
+            </Link>
+          </div>
+        </div>
+        <RangePresets from={range.from} to={range.to} onChange={setRange} />
+
         {payments.data?.items?.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No payments yet.</p>
+          <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">No payments in this period.</p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Paid</TableHead>
-                <TableHead>Enrollment</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.data?.items?.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell>{formatDate(payment.paid_at)}</TableCell>
-                  <TableCell className="font-mono text-xs">{payment.enrollment_id?.slice(0, 8)}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{payment.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">{moneyExact(payment.amount)}</TableCell>
+          <TableCard>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Paid</TableHead>
+                  <TableHead>Enrollment</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {payments.data?.items?.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell>{formatDate(payment.paid_at)}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{payment.enrollment_id?.slice(0, 8)}</TableCell>
+                    <TableCell>
+                      <StatusBadge value={payment.status} />
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">{moneyExact(payment.amount)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableCard>
         )}
-      </Section>
+      </section>
 
       <Popular />
     </>

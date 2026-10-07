@@ -8,27 +8,28 @@ import { capitalize, duration, money, plural } from '@/lib/format'
 
 type CourseItem = components['schemas']['models.CourseListItem']
 
-export function CourseCover({ url, title, className }: { url?: string; title?: string; className?: string }) {
+// the picture is decoration: the title stands beside it
+export function CourseCover({ url, className }: { url?: string; title?: string; className?: string }) {
   if (url) return <img src={url} alt="" className={className} loading="lazy" />
 
   return (
     <div
       className={`flex items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 text-primary/60 ${className ?? ''}`}
-      role="img"
-      aria-label={title}
+      aria-hidden
     >
       <BookOpen className="size-12" />
     </div>
   )
 }
 
-export function CourseCard({ course }: { course: CourseItem }) {
+export function CourseCard({ course, label }: { course: CourseItem; label?: string }) {
   return (
     <Link to={`/courses/${course.id}`} className="group block h-full rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
       <Card className="h-full gap-0 overflow-hidden rounded-2xl py-0 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-lg">
         <div className="relative">
           <CourseCover url={course.cover_url} title={course.title} className="aspect-video w-full object-cover" />
           {course.status === 'draft' && <Badge className="absolute left-3 top-3">Draft</Badge>}
+          {label && course.status !== 'draft' && <Badge className="absolute left-3 top-3 border-transparent bg-amber-400 text-amber-950 shadow">{label}</Badge>}
         </div>
 
         <div className="flex flex-1 flex-col gap-3 p-5">

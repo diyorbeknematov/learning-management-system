@@ -1,6 +1,6 @@
 import { courseGrid } from '@/components/layout/grids'
 import { useQuery } from '@tanstack/react-query'
-import { Search } from 'lucide-react'
+import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { api, call } from '@/api/client'
@@ -9,12 +9,14 @@ import { CourseCard } from '@/components/CourseCard'
 import { NativeSelect } from '@/components/NativeSelect'
 import { PageHeader } from '@/components/PageHeader'
 import { Pagination } from '@/components/Pagination'
-import { Toolbar } from '@/components/Panels'
 import { Empty, ErrorBlock } from '@/components/States'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { plural } from '@/lib/format'
+
+// a rounded, compact select for the filters
+const pill = 'h-9 w-auto min-w-36 rounded-full bg-background pr-8'
 
 const LIMIT = 20
 
@@ -79,6 +81,7 @@ export default function CatalogPage() {
             query: {
               q: q || undefined,
               category_id: categoryId || undefined,
+              status: 'published',
               difficulty: difficulty || undefined,
               price_type: priceType || undefined,
               min_rating: minRating ? Number(minRating) : undefined,
@@ -98,14 +101,37 @@ export default function CatalogPage() {
     <div className="space-y-6">
       <PageHeader title="Courses" description="Learn something new from our instructors." />
 
-      <Toolbar className="items-center">
-        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          <div className="relative sm:col-span-2">
-            <Search className="pointer-events-none absolute left-2.5 top-2 size-4 text-muted-foreground" />
-            <Input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Search courses" aria-label="Search courses" className="pl-8" />
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute left-4 top-3 size-4 text-muted-foreground" />
+            <Input
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder="Search courses"
+              aria-label="Search courses"
+              className="h-10 rounded-full pl-10"
+            />
           </div>
 
-          <NativeSelect aria-label="Category" value={categoryId} onChange={(e) => change({ category: e.target.value })}>
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            Sort by
+            <NativeSelect aria-label="Sort by" className={pill} value={sort} onChange={(e) => change({ sort: e.target.value })}>
+              {sorts.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </label>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 inline-flex items-center gap-1.5 text-sm font-medium">
+            <SlidersHorizontal className="size-4" /> Filters
+          </span>
+
+          <NativeSelect aria-label="Category" className={pill} value={categoryId} onChange={(e) => change({ category: e.target.value })}>
             <option value="">All categories</option>
             {categories.data?.items?.map((category) => (
               <option key={category.id} value={category.id}>
@@ -114,44 +140,34 @@ export default function CatalogPage() {
             ))}
           </NativeSelect>
 
-          <NativeSelect aria-label="Level" value={difficulty} onChange={(e) => change({ difficulty: e.target.value })}>
+          <NativeSelect aria-label="Level" className={pill} value={difficulty} onChange={(e) => change({ difficulty: e.target.value })}>
             <option value="">Any level</option>
             <option value="beginner">Beginner</option>
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>
           </NativeSelect>
 
-          <NativeSelect aria-label="Price" value={priceType} onChange={(e) => change({ price: e.target.value })}>
+          <NativeSelect aria-label="Price" className={pill} value={priceType} onChange={(e) => change({ price: e.target.value })}>
             <option value="">Free and paid</option>
             <option value="free">Free</option>
             <option value="paid">Paid</option>
           </NativeSelect>
 
-          <NativeSelect aria-label="Rating" value={minRating} onChange={(e) => change({ rating: e.target.value })}>
+          <NativeSelect aria-label="Rating" className={pill} value={minRating} onChange={(e) => change({ rating: e.target.value })}>
             <option value="">Any rating</option>
             <option value="4">4 stars and up</option>
             <option value="3">3 stars and up</option>
           </NativeSelect>
-        </div>
-      </Toolbar>
 
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {courses.data ? plural(courses.data.total, 'course') : ' '}
-        </p>
-        <div className="flex items-center gap-2">
           {filtered && (
-            <Button variant="ghost" size="sm" onClick={() => setParams({}, { replace: true })}>
-              Clear filters
+            <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setParams({}, { replace: true })}>
+              <X /> Clear
             </Button>
           )}
-          <NativeSelect aria-label="Sort by" className="w-48" value={sort} onChange={(e) => change({ sort: e.target.value })}>
-            {sorts.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </NativeSelect>
+
+          <p className="ml-auto text-sm text-muted-foreground" aria-live="polite">
+            {courses.data ? plural(courses.data.total, 'course') : ' '}
+          </p>
         </div>
       </div>
 

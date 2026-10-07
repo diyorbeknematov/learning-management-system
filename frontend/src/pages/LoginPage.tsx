@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Lock, User } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router'
@@ -57,8 +58,17 @@ export default function LoginPage() {
       }
     >
       <form onSubmit={handleSubmit(submit)} className="space-y-4" noValidate>
-        <FormField label="Username" autoComplete="username" error={errors.username} {...register('username')} />
-        <FormField label="Password" type="password" autoComplete="current-password" error={errors.password} {...register('password')} />
+        <FormField label="Username" large icon={User} placeholder="Your username" autoComplete="username" error={errors.username} {...register('username')} />
+        <FormField
+          label="Password"
+          large
+          icon={Lock}
+          type="password"
+          placeholder="Your password"
+          autoComplete="current-password"
+          error={errors.password}
+          {...register('password')}
+        />
 
         {failure && (
           <p role="alert" className="text-sm text-destructive">

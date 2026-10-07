@@ -25,7 +25,7 @@ export function AuthLayout() {
             <span className="flex size-9 items-center justify-center rounded-lg bg-white/15">
               <GraduationCap className="size-5" />
             </span>
-            LMS Academy
+            Edura
           </Link>
 
           <div className="relative my-auto max-w-lg space-y-10 py-12">
@@ -43,7 +43,7 @@ export function AuthLayout() {
             </ul>
           </div>
 
-          <p className="relative text-sm opacity-70">© {year} LMS Academy</p>
+          <p className="relative text-sm opacity-70">© {year} Edura</p>
         </aside>
 
         <main className="flex flex-col px-6 py-8 sm:px-12">
@@ -51,7 +51,7 @@ export function AuthLayout() {
             <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <GraduationCap className="size-5" />
             </span>
-            LMS Academy
+            Edura
           </Link>
 
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">

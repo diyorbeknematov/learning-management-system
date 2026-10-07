@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { MoreHorizontal, Plus, Search } from 'lucide-react'
+import { MoreHorizontal, Plus, Search, SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api, call } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useAuth } from '@/auth/context'
 import { PageHeader } from '@/components/PageHeader'
-import { TableCard, Toolbar } from '@/components/Panels'
+import { TableCard } from '@/components/Panels'
 import { StatusBadge } from '@/components/StatusBadge'
 import { NativeSelect } from '@/components/NativeSelect'
 import { Pagination } from '@/components/Pagination'
@@ -34,6 +34,9 @@ import { useForm } from 'react-hook-form'
 
 type User = components['schemas']['models.User']
 type Role = 'SuperAdmin' | 'Instructor' | 'Student'
+
+// a rounded, compact select for the filters
+const pill = 'h-9 w-auto min-w-36 rounded-full bg-background pr-8'
 
 const LIMIT = 20
 
@@ -253,39 +256,74 @@ export default function UsersPage() {
         }
       />
 
-      <Toolbar>
-        <div className="relative min-w-64 flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-2 size-4 text-muted-foreground" />
-          <Input className="pl-8" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Name, username or email" aria-label="Search users" />
+      <div className="space-y-4">
+        <div className="relative w-full max-w-md">
+          <Search className="pointer-events-none absolute left-4 top-3 size-4 text-muted-foreground" />
+          <Input
+            className="h-10 rounded-full pl-10"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder="Name, username or email"
+            aria-label="Search users"
+          />
         </div>
-        <NativeSelect
-          aria-label="Role"
-          className="w-44"
-          value={role}
-          onChange={(e) => {
-            setRole(e.target.value)
-            setPage(1)
-          }}
-        >
-          <option value="">All roles</option>
-          <option value="Student">Students</option>
-          <option value="Instructor">Instructors</option>
-          <option value="SuperAdmin">SuperAdmins</option>
-        </NativeSelect>
-        <NativeSelect
-          aria-label="Status"
-          className="w-44"
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value)
-            setPage(1)
-          }}
-        >
-          <option value="">Any status</option>
-          <option value="active">Active</option>
-          <option value="blocked">Blocked</option>
-        </NativeSelect>
-      </Toolbar>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 inline-flex items-center gap-1.5 text-sm font-medium">
+            <SlidersHorizontal className="size-4" /> Filters
+          </span>
+
+          <NativeSelect
+            aria-label="Role"
+            className={pill}
+            value={role}
+            onChange={(e) => {
+              setRole(e.target.value)
+              setPage(1)
+            }}
+          >
+            <option value="">All roles</option>
+            <option value="Student">Students</option>
+            <option value="Instructor">Instructors</option>
+            <option value="SuperAdmin">SuperAdmins</option>
+          </NativeSelect>
+
+          <NativeSelect
+            aria-label="Status"
+            className={pill}
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value)
+              setPage(1)
+            }}
+          >
+            <option value="">Any status</option>
+            <option value="active">Active</option>
+            <option value="blocked">Blocked</option>
+          </NativeSelect>
+
+          {(role || status || typed) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full"
+              onClick={() => {
+                setRole('')
+                setStatus('')
+                setTyped('')
+                setSearch('')
+                setPage(1)
+              }}
+            >
+              <X /> Clear
+            </Button>
+          )}
+
+          <p className="ml-auto text-sm text-muted-foreground" aria-live="polite">
+            {users.data ? plural(users.data.total, 'user') : ' '}
+          </p>
+        </div>
+      </div>
 
       {users.isPending && <LoadingBlock />}
       {users.isError && <ErrorBlock error={users.error} />}

@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router'
 import { GuestOnly, RequireAuth } from '@/auth/guards'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
+import { RouteError } from '@/components/RouteError'
 import { Contained } from '@/components/layout/Contained'
 
 // Each page is loaded when it is opened, so the first download stays small.
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
   // the sign-in pages have a frame of their own: no menu, the whole screen
   {
     element: <AuthLayout />,
+    errorElement: <RouteError />,
     children: [
       {
         element: <GuestOnly />,
@@ -30,6 +32,7 @@ export const router = createBrowserRouter([
 
   {
     element: <AppLayout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, lazy: page(() => import('@/pages/HomePage')) },
       {

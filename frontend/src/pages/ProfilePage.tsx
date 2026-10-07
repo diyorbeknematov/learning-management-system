@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { Lock, Mail, User } from 'lucide-react'
+import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -8,12 +9,15 @@ import { api, call } from '@/api/client'
 import { useAuth } from '@/auth/context'
 import { FormField } from '@/components/FormField'
 import { ImageUpload } from '@/components/ImageUpload'
+import { PasswordRules } from '@/components/PasswordRules'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { fullName } from '@/lib/format'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
+import { formatDate, fullName } from '@/lib/format'
 import { errorMessage } from '@/lib/query'
 import { applyApiErrors, email, password, required, username } from '@/lib/validation'
 
@@ -27,7 +31,39 @@ const profileSchema = z.object({
 
 type ProfileValues = z.infer<typeof profileSchema>
 
-function IdentityCard() {
+function Header() {
+  const { user } = useAuth()
+  const name = fullName(user)
+
+  return (
+    <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className="h-32 bg-gradient-to-r from-primary via-indigo-500 to-sky-400 sm:h-40" />
+      <div className="flex flex-wrap items-end gap-5 px-6 pb-6">
+        <Avatar className="-mt-14 size-28 border-4 border-card text-3xl shadow-md">
+          <AvatarImage src={user?.avatar_url} alt="" />
+          <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1 space-y-1 pt-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
+            <StatusBadge value={user?.role_name} />
+          </div>
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <User className="size-4" /> @{user?.username}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Mail className="size-4" /> {user?.email}
+            </span>
+            <span>Member since {formatDate(user?.created_at)}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PhotoCard() {
   const { user, setUser } = useAuth()
 
   const save = useMutation({
@@ -39,23 +75,14 @@ function IdentityCard() {
     onError: (error) => toast.error(errorMessage(error)),
   })
 
-  const name = fullName(user)
-
   return (
-    <Card className="items-center text-center lg:sticky lg:top-20 lg:self-start">
-      <CardContent className="flex w-full flex-col items-center gap-4">
-        <Avatar className="size-28 text-3xl">
-          <AvatarImage src={user?.avatar_url} alt="" />
-          <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold">{name}</h1>
-          <p className="text-sm text-muted-foreground">@{user?.username}</p>
-          <Badge variant="secondary">{user?.role_name}</Badge>
-        </div>
-        <div className="w-full border-t pt-4">
-          <ImageUpload purpose="avatar" label="Change the photo" previewUrl={undefined} onUploaded={(key) => save.mutate(key)} />
-        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Photo</CardTitle>
+        <CardDescription>It is shown in the menu and, for instructors, on the course page.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ImageUpload purpose="avatar" label="Your photo" previewUrl={user?.avatar_url} onUploaded={(key) => save.mutate(key)} />
       </CardContent>
     </Card>
   )
@@ -94,32 +121,25 @@ function ProfileForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile</CardTitle>
-        <CardDescription>
-          Your role: <Badge variant="secondary">{user?.role_name}</Badge>
-        </CardDescription>
+        <CardTitle>Personal information</CardTitle>
+        <CardDescription>This is what other people see about you.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit((values) => save.mutate(values))} className="space-y-4" noValidate>
+        <form onSubmit={handleSubmit((values) => save.mutate(values))} className="space-y-5" noValidate>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="First name" error={errors.first_name} {...register('first_name')} />
-            <FormField label="Last name" error={errors.last_name} {...register('last_name')} />
-            <FormField label="Username" error={errors.username} {...register('username')} />
-            <FormField label="Email" type="email" error={errors.email} {...register('email')} />
+            <FormField label="First name" large error={errors.first_name} {...register('first_name')} />
+            <FormField label="Last name" large error={errors.last_name} {...register('last_name')} />
+            <FormField label="Username" large icon={User} error={errors.username} {...register('username')} />
+            <FormField label="Email" large icon={Mail} type="email" error={errors.email} {...register('email')} />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="bio">About you</Label>
-            <textarea
-              id="bio"
-              rows={4}
-              className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              {...register('bio')}
-            />
+            <Textarea id="bio" rows={4} placeholder="A few words about you" {...register('bio')} />
             {errors.bio && <p className="text-sm text-destructive">{errors.bio.message}</p>}
           </div>
 
-          <Button type="submit" disabled={!isDirty || save.isPending}>
+          <Button type="submit" size="lg" disabled={!isDirty || save.isPending}>
             {save.isPending ? 'Saving…' : 'Save'}
           </Button>
         </form>
@@ -142,8 +162,11 @@ function PasswordForm() {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors },
   } = useForm<PasswordValues>({ resolver: zodResolver(passwordSchema) })
+
+  const typed = useWatch({ control, name: 'new_password' })
 
   const change = useMutation({
     mutationFn: (values: PasswordValues) =>
@@ -166,12 +189,37 @@ function PasswordForm() {
         <CardDescription>After the change you log in again, on every device.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit((values) => change.mutate(values))} className="max-w-sm space-y-4" noValidate>
-          <FormField label="Current password" type="password" autoComplete="current-password" error={errors.old_password} {...register('old_password')} />
-          <FormField label="New password" type="password" autoComplete="new-password" error={errors.new_password} {...register('new_password')} />
-          <FormField label="Repeat the new password" type="password" autoComplete="new-password" error={errors.confirm} {...register('confirm')} />
+        <form onSubmit={handleSubmit((values) => change.mutate(values))} className="max-w-md space-y-4" noValidate>
+          <FormField
+            label="Current password"
+            large
+            icon={Lock}
+            type="password"
+            autoComplete="current-password"
+            error={errors.old_password}
+            {...register('old_password')}
+          />
+          <FormField
+            label="New password"
+            large
+            icon={Lock}
+            type="password"
+            autoComplete="new-password"
+            error={errors.new_password}
+            {...register('new_password')}
+          />
+          <PasswordRules value={typed} />
+          <FormField
+            label="Repeat the new password"
+            large
+            icon={Lock}
+            type="password"
+            autoComplete="new-password"
+            error={errors.confirm}
+            {...register('confirm')}
+          />
 
-          <Button type="submit" disabled={change.isPending}>
+          <Button type="submit" size="lg" disabled={change.isPending}>
             {change.isPending ? 'Saving…' : 'Change the password'}
           </Button>
         </form>
@@ -182,12 +230,26 @@ function PasswordForm() {
 
 export default function ProfilePage() {
   return (
-    <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]">
-      <IdentityCard />
-      <div className="space-y-6">
-        <ProfileForm />
-        <PasswordForm />
-      </div>
+    <div className="space-y-6">
+      <Header />
+
+      <Tabs defaultValue="personal">
+        <TabsList>
+          <TabsTrigger value="personal">Personal info</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="personal" className="pt-4">
+          <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+            <PhotoCard />
+            <ProfileForm />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="security" className="pt-4">
+          <PasswordForm />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

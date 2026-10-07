@@ -1,6 +1,7 @@
-import { GraduationCap } from 'lucide-react'
+import { Award, BookOpen, GraduationCap, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '@/auth/context'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { buttonVariants } from '@/components/ui/button'
 import {
@@ -27,30 +28,61 @@ function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50" aria-label="Account menu">
-        <Avatar>
+      <DropdownMenuTrigger
+        className="rounded-full outline-none transition hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
+        aria-label="Account menu"
+      >
+        <Avatar className="size-11">
           <AvatarImage src={user.avatar_url} alt="" />
-          <AvatarFallback>{initials}</AvatarFallback>
+          <AvatarFallback className="bg-primary/10 text-base font-medium text-primary">{initials}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+
+      <DropdownMenuContent align="end" sideOffset={8} className="w-72 p-0">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            <div className="font-medium">{name}</div>
-            <div className="text-xs font-normal opacity-70">{user.role_name}</div>
+          <DropdownMenuLabel className="p-0">
+            <div className="flex items-center gap-3 border-b bg-muted/40 px-4 py-4">
+              <Avatar className="size-12">
+                <AvatarImage src={user.avatar_url} alt="" />
+                <AvatarFallback className="bg-primary/10 text-base font-medium text-primary">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 space-y-0.5">
+                <p className="truncate text-base font-semibold text-foreground">{name}</p>
+                <p className="truncate text-sm font-normal text-muted-foreground">{user.email}</p>
+                <StatusBadge value={user.role_name} />
+              </div>
+            </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/dashboard')}>Dashboard</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={async () => {
-            await logout()
-            navigate('/')
-          }}
-        >
-          Log out
-        </DropdownMenuItem>
+
+        <div className="p-1.5">
+          <DropdownMenuItem className="gap-3 py-2" onClick={() => navigate('/dashboard')}>
+            <LayoutDashboard className="size-4" /> Dashboard
+          </DropdownMenuItem>
+          {user.role_name === 'Student' && (
+            <>
+              <DropdownMenuItem className="gap-3 py-2" onClick={() => navigate('/my-courses')}>
+                <BookOpen className="size-4" /> My courses
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-3 py-2" onClick={() => navigate('/certificates')}>
+                <Award className="size-4" /> Certificates
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuItem className="gap-3 py-2" onClick={() => navigate('/profile')}>
+            <UserIcon className="size-4" /> Profile and security
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="gap-3 py-2 text-destructive focus:text-destructive"
+            onClick={async () => {
+              await logout()
+              navigate('/')
+            }}
+          >
+            <LogOut className="size-4" /> Log out
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -59,7 +91,10 @@ function UserMenu() {
 const year = new Date().getFullYear()
 
 const link = ({ isActive }: { isActive: boolean }) =>
-  cn('whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-medium text-foreground')
+  cn(
+    'whitespace-nowrap rounded-lg px-3.5 py-2 text-base font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground',
+    isActive && 'bg-muted font-medium text-foreground',
+  )
 
 export function AppLayout() {
   const { user, loading } = useAuth()
@@ -68,12 +103,12 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
-        <div className={`${container} flex h-14 items-center gap-4`}>
-          <Link to="/" className="flex shrink-0 items-center gap-2 font-semibold">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="size-5" />
+        <div className={`${container} flex h-[4.5rem] items-center gap-6`}>
+          <Link to="/" className="flex shrink-0 items-center gap-3 text-xl font-semibold">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <GraduationCap className="size-6" />
             </span>
-            <span className="hidden sm:inline">LMS Academy</span>
+            <span className="hidden sm:inline">Edura</span>
           </Link>
 
           <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="Main">
@@ -119,10 +154,10 @@ export function AppLayout() {
               <UserMenu />
             ) : (
               <div className="flex shrink-0 gap-2">
-                <Link to="/login" className={buttonVariants({ variant: 'ghost' })}>
+                <Link to="/login" className={buttonVariants({ variant: 'ghost', size: 'lg' }) + ' h-10 px-4 text-base'}>
                   Log in
                 </Link>
-                <Link to="/register" className={buttonVariants()}>
+                <Link to="/register" className={buttonVariants({ size: 'lg' }) + ' h-10 px-4 text-base'}>
                   Sign up
                 </Link>
               </div>
@@ -136,7 +171,7 @@ export function AppLayout() {
 
       <footer className="border-t">
         <div className={`${container} flex flex-wrap items-center justify-between gap-2 py-6 text-sm text-muted-foreground`}>
-          <span>© {year} LMS Academy</span>
+          <span>© {year} Edura</span>
           <nav className="flex gap-4" aria-label="Footer">
             <Link to="/courses" className="hover:text-foreground">
               Courses

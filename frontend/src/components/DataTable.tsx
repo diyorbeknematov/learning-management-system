@@ -9,9 +9,16 @@ const title = (key: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-function cell(value: unknown): string {
+const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
+function cell(value: unknown, key = ''): string {
   if (value === null || value === undefined || value === '') return '—'
-  if (typeof value === 'number') return Number.isInteger(value) ? String(value) : value.toFixed(2)
+  if (typeof value === 'number') {
+    if (/revenue|amount|price|value|profit/.test(key)) return money.format(value)
+    if (/rate|percent/.test(key)) return `${Number(value.toFixed(1))}%`
+
+    return Number.isInteger(value) ? String(value) : value.toFixed(2)
+  }
   if (typeof value === 'boolean') return value ? 'Yes' : 'No'
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) return value.slice(0, 10)
   if (typeof value === 'object') return JSON.stringify(value)
@@ -31,7 +38,9 @@ export function DataTable({ rows }: { rows: Row[] }) {
         <TableHeader>
           <TableRow>
             {columns.map((key) => (
-              <TableHead key={key}>{title(key)}</TableHead>
+              <TableHead key={key} className={typeof rows[0][key] === 'number' ? 'text-right' : undefined}>
+                {title(key)}
+              </TableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -39,7 +48,9 @@ export function DataTable({ rows }: { rows: Row[] }) {
           {rows.map((row, index) => (
             <TableRow key={index}>
               {columns.map((key) => (
-                <TableCell key={key}>{cell(row[key])}</TableCell>
+                <TableCell key={key} className={typeof row[key] === 'number' ? 'text-right tabular-nums' : undefined}>
+                  {cell(row[key], key)}
+                </TableCell>
               ))}
             </TableRow>
           ))}

@@ -1,25 +1,28 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CheckCircle2, DollarSign, Eye, FilePlus2, ListChecks, Rocket, Layers } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { z } from 'zod'
 import { api, call } from '@/api/client'
 import { useCategories } from '@/api/queries'
 import type { components } from '@/api/schema'
 import { useAuth } from '@/auth/context'
+import { CourseCard } from '@/components/CourseCard'
 import { FormField } from '@/components/FormField'
 import { ImageUpload } from '@/components/ImageUpload'
 import { NativeSelect } from '@/components/NativeSelect'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { fullName } from '@/lib/format'
 import { useApiMutation } from '@/lib/mutations'
 import { applyApiErrors, required } from '@/lib/validation'
 
 type CourseDetail = components['schemas']['models.CourseDetail']
 
-const number = (label: string) =>
-  z.number({ error: `${label} must be a number` }).min(0, `${label} cannot be negative`)
+const number = (label: string) => z.number({ error: `${label} must be a number` }).min(0, `${label} cannot be negative`)
 
 const schema = z.object({
   title: required('Title'),
@@ -50,11 +53,13 @@ export function CourseDetailsForm({ course }: { course?: CourseDetail }) {
   const categories = useCategories()
   const isAdmin = user?.role_name === 'SuperAdmin'
   const [cover, setCover] = useState<string | undefined>()
+  const [coverPreview, setCoverPreview] = useState<string | undefined>()
 
   const {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isDirty },
   } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -73,6 +78,24 @@ export function CourseDetailsForm({ course }: { course?: CourseDetail }) {
     },
   })
 
+  const live = useWatch({ control })
+  const category = categories.data?.items?.find((item) => item.id === live.category_id)
+
+  // the course as a student will see it on the card
+  const preview = {
+    id: course?.id,
+    title: live.title?.trim() || 'The title of your course',
+    category_name: category?.name,
+    instructor_name: course?.instructor_name ?? fullName(user),
+    cover_url: coverPreview ?? course?.cover_url,
+    price: Number.isFinite(live.price) ? live.price : 0,
+    difficulty: live.difficulty || undefined,
+    total_duration: Number.isFinite(live.total_duration) ? live.total_duration : 0,
+    lesson_count: course?.lesson_count ?? 0,
+    avg_rating: course?.avg_rating ?? 0,
+    review_count: course?.review_count ?? 0,
+  } as components['schemas']['models.CourseListItem']
+
   const save = useApiMutation(
     (values: Values) => {
       const body = {
@@ -90,9 +113,7 @@ export function CourseDetailsForm({ course }: { course?: CourseDetail }) {
         ...(isAdmin && values.payout_type ? { payout_type: values.payout_type, payout_value: values.payout_value } : {}),
       }
 
-      return course
-        ? call(api.PUT('/courses/{courseId}', { params: { path: { courseId: course.id! } }, body }))
-        : call(api.POST('/courses', { body }))
+      return course ? call(api.PUT('/courses/{courseId}', { params: { path: { courseId: course.id! } }, body })) : call(api.POST('/courses', { body }))
     },
     {
       success: course ? 'Course saved' : 'Course created',
@@ -105,74 +126,209 @@ export function CourseDetailsForm({ course }: { course?: CourseDetail }) {
   )
 
   return (
-    <form onSubmit={handleSubmit((values) => save.mutate(values))} className="max-w-2xl space-y-5" noValidate>
-      <FormField label="Title" error={errors.title} {...register('title')} />
+    <form onSubmit={handleSubmit((values) => save.mutate(values))} noValidate className="grid gap-6 xl:grid-cols-[minmax(0,48rem)_24rem] xl:justify-center">
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Basics</CardTitle>
+            <CardDescription>The title and the description are the first things a student reads.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <FormField label="Title" large error={errors.title} {...register('title')} />
 
-      <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" rows={5} {...register('description')} />
+            <div className="space-y-1.5">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                rows={6}
+                className="min-h-32 px-3.5 py-3 text-base"
+                placeholder="What is the course about, and for whom?"
+                {...register('description')}
+              />
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="learning_outcomes">What students learn</Label>
+                <Textarea
+                  id="learning_outcomes"
+                  rows={6}
+                  className="min-h-32 px-3.5 py-3 text-base"
+                  placeholder="One point on each line"
+                  {...register('learning_outcomes')}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="requirements">Requirements</Label>
+                <Textarea
+                  id="requirements"
+                  rows={6}
+                  className="min-h-32 px-3.5 py-3 text-base"
+                  placeholder="One point on each line"
+                  {...register('requirements')}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="gap-3 py-4">
+          <CardHeader>
+            <CardTitle>Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="category_id">Category</Label>
+              <NativeSelect id="category_id" aria-invalid={errors.category_id ? true : undefined} {...register('category_id')}>
+                <option value="">Choose…</option>
+                {categories.data?.items?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </NativeSelect>
+              {errors.category_id && <p className="text-sm text-destructive">{errors.category_id.message}</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="difficulty">Level</Label>
+              <NativeSelect id="difficulty" {...register('difficulty')}>
+                <option value="">Not set</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </NativeSelect>
+            </div>
+
+            <FormField label="Language" placeholder="English" error={errors.language} {...register('language')} />
+            <FormField
+              label="Duration (minutes)"
+              type="number"
+              min={0}
+              error={errors.total_duration}
+              {...register('total_duration', { valueAsNumber: true })}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="gap-3 py-4">
+          <CardHeader>
+            <CardTitle>Price</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              label="Price (USD, 0 is free)"
+              large
+              icon={DollarSign}
+              type="number"
+              min={0}
+              step="0.01"
+              error={errors.price}
+              {...register('price', { valueAsNumber: true })}
+            />
+
+            {isAdmin && (
+              <div className="space-y-4 border-t pt-4">
+                <p className="text-sm font-medium">Instructor payout (only you see this)</p>
+                <div className="space-y-1.5">
+                  <Label htmlFor="payout_type">Type</Label>
+                  <NativeSelect id="payout_type" {...register('payout_type')}>
+                    <option value="">No payout</option>
+                    <option value="percentage">Percentage of the price</option>
+                    <option value="fixed">Fixed amount per student</option>
+                  </NativeSelect>
+                </div>
+                <FormField
+                  label="Value"
+                  large
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  error={errors.payout_value}
+                  {...register('payout_value', { valueAsNumber: true })}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {!course && (
+          <Card>
+            <CardHeader>
+              <CardTitle>What happens next</CardTitle>
+              <CardDescription>A course goes live in four steps.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ol className="space-y-4">
+                {[
+                  [FilePlus2, 'Create the course', 'The title, the description, the price and the cover: this page.'],
+                  [Layers, 'Add the content', 'Modules and lessons with text, video links and files.'],
+                  [ListChecks, 'Add a quiz', 'Optional. A final quiz decides if a student gets the certificate.'],
+                  [Rocket, 'Publish', 'Only then students can see and join the course.'],
+                ].map(([Icon, title, text], index) => {
+                  const I = Icon as typeof CheckCircle2
+
+                  return (
+                    <li key={title as string} className="flex gap-3">
+                      <span
+                        className={
+                          index === 0
+                            ? 'flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground'
+                            : 'flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground'
+                        }
+                      >
+                        <I className="size-4" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {index + 1}. {title as string}
+                        </p>
+                        <p className="text-sm text-muted-foreground">{text as string}</p>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="flex items-center gap-3">
+          <Button type="submit" size="lg" disabled={save.isPending || (Boolean(course) && !isDirty && !cover)}>
+            {save.isPending ? 'Saving…' : course ? 'Save changes' : 'Create the course'}
+          </Button>
+          {!course && <p className="text-sm text-muted-foreground">You add the lessons and quizzes next.</p>}
+        </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="category_id">Category</Label>
-          <NativeSelect id="category_id" aria-invalid={errors.category_id ? true : undefined} {...register('category_id')}>
-            <option value="">Choose…</option>
-            {categories.data?.items?.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </NativeSelect>
-          {errors.category_id && <p className="text-sm text-destructive">{errors.category_id.message}</p>}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="difficulty">Level</Label>
-          <NativeSelect id="difficulty" {...register('difficulty')}>
-            <option value="">Not set</option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-          </NativeSelect>
-        </div>
-
-        <FormField label="Language" placeholder="English" error={errors.language} {...register('language')} />
-        <FormField label="Total duration (minutes)" type="number" min={0} error={errors.total_duration} {...register('total_duration', { valueAsNumber: true })} />
-        <FormField label="Price (USD, 0 is free)" type="number" min={0} step="0.01" error={errors.price} {...register('price', { valueAsNumber: true })} />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="learning_outcomes">What students learn</Label>
-          <Textarea id="learning_outcomes" rows={5} placeholder="One point on each line" {...register('learning_outcomes')} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="requirements">Requirements</Label>
-          <Textarea id="requirements" rows={5} placeholder="One point on each line" {...register('requirements')} />
-        </div>
-      </div>
-
-      <ImageUpload purpose="course_cover" label="Cover image" previewUrl={course?.cover_url} onUploaded={setCover} />
-
-      {isAdmin && (
-        <fieldset className="grid gap-4 rounded-lg border p-4 sm:grid-cols-2">
-          <legend className="px-1 text-sm font-medium">Instructor payout (only you see this)</legend>
-          <div className="space-y-1.5">
-            <Label htmlFor="payout_type">Type</Label>
-            <NativeSelect id="payout_type" {...register('payout_type')}>
-              <option value="">No payout</option>
-              <option value="percentage">Percentage of the price</option>
-              <option value="fixed">Fixed amount per student</option>
-            </NativeSelect>
+      <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+        <section aria-label="Preview" className="space-y-2">
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Eye className="size-4" /> How it looks in the catalog
+          </p>
+          <div className="pointer-events-none" aria-hidden>
+            <CourseCard course={preview} />
           </div>
-          <FormField label="Value" type="number" min={0} step="0.01" error={errors.payout_value} {...register('payout_value', { valueAsNumber: true })} />
-        </fieldset>
-      )}
+        </section>
 
-      <Button type="submit" disabled={save.isPending || (Boolean(course) && !isDirty && !cover)}>
-        {save.isPending ? 'Saving…' : course ? 'Save changes' : 'Create the course'}
-      </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Cover image</CardTitle>
+            <CardDescription>Shown on the course card and the course page.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload
+              purpose="course_cover"
+              label="Cover"
+              previewUrl={course?.cover_url}
+              onUploaded={(key, url) => {
+                setCover(key)
+                setCoverPreview(url)
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </form>
   )
 }

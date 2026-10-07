@@ -98,18 +98,18 @@ test.describe('the instructor builds the course', () => {
     await teacher.getByLabel('Category').selectOption({ label: categoryName })
     await teacher.getByLabel('Level').selectOption('beginner')
     await teacher.getByLabel('Price (USD, 0 is free)').fill('25')
-    await teacher.getByLabel('Total duration (minutes)').fill('90')
+    await teacher.getByLabel('Duration (minutes)').fill('90')
     await teacher.getByLabel('What students learn').fill('Write Go programs\nUse goroutines')
     await teacher.getByLabel('Requirements').fill('A laptop')
     await teacher.locator('#upload-course_cover').setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: png })
-    await expect(teacher.locator('img[src^="blob:"]')).toBeVisible()
+    await expect(teacher.locator('img[src^="blob:"]').first()).toBeVisible()
 
     await teacher.getByRole('button', { name: 'Create the course' }).click()
     await expect(teacher).toHaveURL(/\/teach\/courses\/[0-9a-f-]{36}$/)
 
     courseId = teacher.url().split('/').pop()!
     await expect(teacher.getByRole('heading', { name: courseTitle })).toBeVisible()
-    await expect(teacher.locator('img[src*="covers/"]')).toBeVisible()
+    await expect(teacher.locator('img[src*="covers/"]').first()).toBeVisible()
   })
 
   test('adds modules and lessons: one free preview, one locked', async () => {
@@ -170,6 +170,16 @@ test.describe('the instructor builds the course', () => {
     await teacher.keyboard.press('Escape')
   })
 
+  test('a draft is not in the catalog or on the home page, not even for the SuperAdmin', async () => {
+    await admin.goto(`/courses?q=${encodeURIComponent(courseTitle)}`)
+    await expect(admin.getByText('No course matches your search')).toBeVisible()
+
+    await admin.goto('/')
+    await expect(admin.getByText(courseTitle)).toHaveCount(0)
+    await admin.goto('/dashboard')
+    await expect(admin.getByText(courseTitle)).toHaveCount(0)
+  })
+
   test('publishes the course', async () => {
     await teacher.getByRole('button', { name: 'Publish', exact: true }).click()
     await expect(teacher.getByText('Published', { exact: true })).toBeVisible()
@@ -203,7 +213,7 @@ test.describe('a visitor', () => {
     await visitor.goto('/')
     await expect(visitor.getByRole('heading', { name: /Learn something new/ })).toBeVisible()
     await expect(visitor.getByRole('region', { name: 'Categories' })).toBeVisible()
-    await expect(visitor.getByRole('region', { name: 'Popular courses' }).getByRole('link').first()).toBeVisible()
+    await expect(visitor.getByRole('region', { name: 'Bestsellers' }).getByRole('link').first()).toBeVisible()
 
     // the search of the home page leads to the catalog
     await visitor.getByLabel('Search courses').fill(courseTitle)
@@ -266,7 +276,7 @@ test.describe('a student', () => {
 
   test('gets the certificate, downloads it and it can be checked by anybody', async () => {
     await learner.goto('/certificates')
-    await expect(learner.getByText(courseTitle)).toBeVisible()
+    await expect(learner.getByText(courseTitle).first()).toBeVisible()
 
     const download = learner.waitForEvent('download')
     await learner.getByRole('button', { name: 'Download PDF' }).click()
@@ -312,8 +322,19 @@ test.describe('afterwards', () => {
     await admin.goto('/admin/payments')
     await expect(admin.getByRole('cell', { name: '$25.00' }).first()).toBeVisible()
 
+    // the period is picked from a calendar
+    await admin.locator('#range-from').click()
+    await admin.getByRole('button', { name: 'Today', exact: true }).click()
+    await expect(admin.locator('#range-from')).not.toContainText('Any day')
+    await expect(admin.getByRole('cell', { name: '$25.00' }).first()).toBeVisible()
+
+    // and the dashboard has the same filter for the latest payments
+    await admin.goto('/dashboard')
+    await admin.getByRole('button', { name: 'Last 30 days' }).click()
+    await expect(admin.getByRole('region', { name: 'Latest payments' }).getByRole('cell', { name: '$25.00' }).first()).toBeVisible()
+
     await admin.goto('/admin/finance')
-    await expect(admin.getByText('Net profit')).toBeVisible()
+    await expect(admin.getByText('Net profit').first()).toBeVisible()
 
     await admin.goto('/admin/reports')
     await admin.getByLabel('Report').selectOption('revenue')

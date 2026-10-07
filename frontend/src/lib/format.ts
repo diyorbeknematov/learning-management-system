@@ -42,8 +42,8 @@ export function capitalize(text?: string | null): string {
 }
 
 /** "1 course", "2 courses". */
-export function plural(count: number | undefined | null, word: string): string {
+export function plural(count: number | undefined | null, word: string, many?: string): string {
   const n = count ?? 0
 
-  return `${n} ${n === 1 ? word : word + 's'}`
+  return `${n} ${n === 1 ? word : (many ?? word + 's')}`
 }

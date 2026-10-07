@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router'
 import { api, call } from '@/api/client'
 import { useCategories } from '@/api/queries'
 import { useAuth } from '@/auth/context'
+import { Carousel } from '@/components/Carousel'
 import { CourseCard } from '@/components/CourseCard'
 import { ErrorBlock } from '@/components/States'
 import { buttonVariants } from '@/components/ui/button'
@@ -14,18 +15,24 @@ import { container } from '@/components/layout/container'
 import { Skeleton } from '@/components/ui/skeleton'
 import { plural } from '@/lib/format'
 
-type Sort = 'popular' | 'rating'
+type Sort = 'popular' | 'rating' | 'newest'
 
-function CourseRow({ title, sort, minRating, link }: { title: string; sort: Sort; minRating?: number; link: string }) {
+// a course that this many students joined is called a bestseller
+const BESTSELLER = 3
+
+function CourseRow({ title, sort, minRating, link, badge }: { title: string; sort: Sort; minRating?: number; link: string; badge?: 'bestseller' | 'new' }) {
   const courses = useQuery({
     queryKey: ['courses', 'home', sort],
-    queryFn: () => call(api.GET('/courses', { params: { query: { sort, min_rating: minRating, limit: 4 } } })),
+    queryFn: () => call(api.GET('/courses', { params: { query: { status: 'published', sort, min_rating: minRating, limit: 12 } } })),
   })
 
   if (courses.isError) return <ErrorBlock error={courses.error} />
 
   // nothing to show: the section is left out
   if (courses.data && courses.data.items?.length === 0) return null
+
+  const labelOf = (course: { enrollment_count?: number }) =>
+    badge === 'bestseller' ? ((course.enrollment_count ?? 0) >= BESTSELLER ? 'Bestseller' : undefined) : badge === 'new' ? 'New' : undefined
 
   return (
     <section className={`${container} space-y-4`} aria-label={title}>
@@ -36,12 +43,19 @@ function CourseRow({ title, sort, minRating, link }: { title: string; sort: Sort
         </Link>
       </div>
 
-      <div className={courseGrid}>
-        {courses.isPending && Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-72" />)}
-        {courses.data?.items?.map((course) => (
-          <CourseCard key={course.id} course={course} />
-        ))}
-      </div>
+      {courses.isPending ? (
+        <div className={courseGrid}>
+          {Array.from({ length: 4 }, (_, i) => (
+            <Skeleton key={i} className="h-72" />
+          ))}
+        </div>
+      ) : (
+        <Carousel label={title}>
+          {courses.data?.items?.map((course) => (
+            <CourseCard key={course.id} course={course} label={labelOf(course)} />
+          ))}
+        </Carousel>
+      )}
     </section>
   )
 }
@@ -54,7 +68,7 @@ function Categories() {
   const counts = useQueries({
     queries: shown.map((category) => ({
       queryKey: ['courses', 'count', category.id],
-      queryFn: () => call(api.GET('/courses', { params: { query: { category_id: category.id, limit: 1 } } })),
+      queryFn: () => call(api.GET('/courses', { params: { query: { status: 'published', category_id: category.id, limit: 1 } } })),
     })),
   })
 
@@ -97,7 +111,7 @@ export default function HomePage() {
 
   const totals = useQuery({
     queryKey: ['courses', 'count', 'all'],
-    queryFn: () => call(api.GET('/courses', { params: { query: { limit: 1 } } })),
+    queryFn: () => call(api.GET('/courses', { params: { query: { status: 'published', limit: 1 } } })),
   })
   const categories = useCategories()
 
@@ -105,7 +119,7 @@ export default function HomePage() {
     <div className="space-y-16 pb-16">
       <section className="bg-gradient-to-b from-primary/15 via-primary/5 to-background py-16 text-center sm:py-24">
         <div className={container}>
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs font-medium text-primary">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-primary">
             <Sparkles className="size-3.5" /> Learn new skills online
           </p>
           <h1 className="mx-auto max-w-2xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Learn something new, one lesson at a time</h1>
@@ -151,8 +165,9 @@ export default function HomePage() {
 
       <Categories />
 
-      <CourseRow title="Popular courses" sort="popular" link="/courses?sort=popular" />
+      <CourseRow title="Bestsellers" sort="popular" badge="bestseller" link="/courses?sort=popular" />
       <CourseRow title="Best rated" sort="rating" minRating={4} link="/courses?sort=rating&rating=4" />
+      <CourseRow title="Newest courses" sort="newest" badge="new" link="/courses?sort=newest" />
 
       <section className={`${container} space-y-6`} aria-label="How it works">
         <h2 className="text-center text-xl font-semibold">How it works</h2>

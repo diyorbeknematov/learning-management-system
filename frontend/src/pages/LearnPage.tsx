@@ -108,10 +108,7 @@ export default function LearnPage() {
                   <li key={lesson.id}>
                     <Link
                       to={`/learn/${courseId}/lessons/${lesson.id}`}
-                      className={cn(
-                        'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted',
-                        lesson.id === lessonId && 'bg-muted font-medium',
-                      )}
+                      className={cn('flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted', lesson.id === lessonId && 'bg-muted font-medium')}
                     >
                       {done.has(lesson.id!) ? (
                         <Check className="size-4 shrink-0 text-green-600" aria-label="Done" />
@@ -156,9 +153,15 @@ export default function LearnPage() {
           <p className="text-muted-foreground">This course has no lessons yet.</p>
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="flex-1 text-2xl font-semibold">{current.title}</h1>
-              {current.is_preview && <Badge variant="secondary">Preview</Badge>}
+            <div className="space-y-2 border-b pb-5">
+              <p className="text-sm text-muted-foreground">
+                Lesson {lessons.findIndex((lesson) => lesson.id === current.id) + 1} of {lessons.length} · {duration(current.duration)}
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="flex-1 text-3xl font-bold tracking-tight">{current.title}</h1>
+                {current.is_preview && <Badge variant="secondary">Preview</Badge>}
+                {done.has(current.id!) && <Badge>Done</Badge>}
+              </div>
             </div>
 
             <LessonMaterials lessonId={current.id!} />
