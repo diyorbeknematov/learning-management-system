@@ -164,3 +164,27 @@ func TestNew_ExpiresTheTemporaryFolder(t *testing.T) {
 	require.Equal(t, "Enabled", rules.Rules[0].Status)
 	require.EqualValues(t, 1, rules.Rules[0].Expiration.Days)
 }
+
+func TestPresign_UsesThePublicEndpoint(t *testing.T) {
+	m := setupMinIO(t)
+
+	cfg := config.Load().MinIO
+	cfg.Bucket = m.Bucket
+	cfg.PublicEndpoint = "files.example.com"
+
+	public, err := minio.New(cfg)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	upload, err := public.PresignUpload(ctx, "tmp/avatars/a.png")
+	require.NoError(t, err)
+	require.Contains(t, upload, "files.example.com", "the browser is sent to the public address")
+
+	download, err := public.PresignDownload(ctx, "avatars/a.png")
+	require.NoError(t, err)
+	require.Contains(t, download, "files.example.com")
+
+	// the API itself still talks to the real address
+	require.NoError(t, public.Delete(ctx, "avatars/never-existed.png"))
+}

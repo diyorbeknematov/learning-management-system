@@ -27,15 +27,18 @@ const tempLifetime = 1
 const region = "us-east-1"
 
 type MinIO struct {
-	Client          *clientMinIO.Client
+	Client *clientMinIO.Client
+	// presigner makes the links for clients. A link is signed for one host, so
+	// it has to be made for the address the browser uses, which can differ from
+	// the address of the API (see config.MinIOConfig.PublicEndpoint).
+	presigner       *clientMinIO.Client
 	Bucket          string
 	PresignedExpiry time.Duration
 }
 
-// New connects to MinIO and creates the bucket if it does not exist yet.
-func New(cfg config.MinIOConfig) (*MinIO, error) {
+func newClient(cfg config.MinIOConfig, endpoint string) (*clientMinIO.Client, error) {
 	client, err := clientMinIO.New(
-		cfg.Endpoint,
+		endpoint,
 		&clientMinIO.Options{
 			Creds: credentials.NewStaticV4(
 				cfg.AccessKey,
@@ -46,13 +49,33 @@ func New(cfg config.MinIOConfig) (*MinIO, error) {
 			Region: region,
 		},
 	)
-
 	if err != nil {
 		return nil, fmt.Errorf("create minio client: %w", err)
 	}
 
+	return client, nil
+}
+
+// New connects to MinIO and creates the bucket if it does not exist yet.
+func New(cfg config.MinIOConfig) (*MinIO, error) {
+	client, err := newClient(cfg, cfg.Endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	presigner := client
+
+	if cfg.PublicEndpoint != "" && cfg.PublicEndpoint != cfg.Endpoint {
+		// no request is sent with this client: presigning is computed locally
+		presigner, err = newClient(cfg, cfg.PublicEndpoint)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	m := &MinIO{
 		Client:          client,
+		presigner:       presigner,
 		Bucket:          cfg.Bucket,
 		PresignedExpiry: cfg.PresignedExpiry,
 	}
@@ -104,7 +127,7 @@ func (m *MinIO) ensureTempLifecycle(ctx context.Context) error {
 // PresignUpload returns a URL the client can PUT the file to directly. It is
 // valid for PresignedExpiry.
 func (m *MinIO) PresignUpload(ctx context.Context, objectKey string) (string, error) {
-	u, err := m.Client.PresignedPutObject(ctx, m.Bucket, objectKey, m.PresignedExpiry)
+	u, err := m.presigner.PresignedPutObject(ctx, m.Bucket, objectKey, m.PresignedExpiry)
 	if err != nil {
 		return "", apperror.Internal(
 			"storage",
@@ -120,7 +143,7 @@ func (m *MinIO) PresignUpload(ctx context.Context, objectKey string) (string, er
 // PresignDownload returns a URL the client can GET the file from. It is valid
 // for PresignedExpiry.
 func (m *MinIO) PresignDownload(ctx context.Context, objectKey string) (string, error) {
-	u, err := m.Client.PresignedGetObject(ctx, m.Bucket, objectKey, m.PresignedExpiry, url.Values{})
+	u, err := m.presigner.PresignedGetObject(ctx, m.Bucket, objectKey, m.PresignedExpiry, url.Values{})
 	if err != nil {
 		return "", apperror.Internal(
 			"storage",

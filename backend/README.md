@@ -41,6 +41,10 @@ Useful commands: `make logs` (API logs), `make down` (stop, data stays), `make r
 
 `make help` lists every command: tests (`make test`, they need PostgreSQL and Redis and are skipped without them), migrations, formatting and so on.
 
+### Files and MinIO
+
+Browsers upload files to MinIO directly and download them with temporary links. Those links are signed for one address, so if the API reaches MinIO at an address the browser cannot (`minio:9000` inside Docker), set `MINIO_PUBLIC_ENDPOINT` to the address of the browser (`localhost:9000`). The compose file does this; without Docker it can stay empty.
+
 ### The token secret
 
 `TOKEN_SECRET` signs the access tokens (JWT). In production the API refuses to start unless it is a random string of at least 32 characters. Make one with OpenSSL and paste the result as `TOKEN_SECRET` in `.env`:

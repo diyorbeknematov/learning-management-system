@@ -42,7 +42,12 @@ type SMTPConfig struct {
 }
 
 type MinIOConfig struct {
-	Endpoint        string
+	Endpoint string
+	// PublicEndpoint is the address of MinIO as a browser sees it. The links
+	// that clients upload to and download from are made for it; when it is not
+	// set, Endpoint is used. They differ in Docker, where the API reaches MinIO
+	// at minio:9000 and the browser at localhost:9000.
+	PublicEndpoint  string
 	AccessKey       string
 	SecretKey       string
 	Bucket          string
@@ -126,6 +131,7 @@ func Load() *Config {
 
 		MinIO: MinIOConfig{
 			Endpoint:        cast.ToString(coalesce("MINIO_ENDPOINT", "localhost:9000")),
+			PublicEndpoint:  cast.ToString(coalesce("MINIO_PUBLIC_ENDPOINT", "")),
 			AccessKey:       cast.ToString(coalesce("MINIO_ACCESS_KEY", "")),
 			SecretKey:       cast.ToString(coalesce("MINIO_SECRET_KEY", "")),
 			Bucket:          cast.ToString(coalesce("MINIO_BUCKET", "lms")),
