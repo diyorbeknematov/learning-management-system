@@ -4,12 +4,15 @@ import { api, call } from '@/api/client'
 import { useCategories } from '@/api/queries'
 import type { components } from '@/api/schema'
 import { ConfirmButton } from '@/components/ConfirmButton'
+import { PageHeader } from '@/components/PageHeader'
+import { TableCard } from '@/components/Panels'
 import { Empty, ErrorBlock, LoadingBlock } from '@/components/States'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { formatDate, plural } from '@/lib/format'
 import { useApiMutation } from '@/lib/mutations'
 
 type Category = components['schemas']['models.Category']
@@ -22,9 +25,7 @@ function CategoryDialog({ category, onClose }: { category?: Category; onClose: (
     () => {
       const body = { name: name.trim(), description: description.trim() }
 
-      return category
-        ? call(api.PUT('/categories/{id}', { params: { path: { id: category.id! } }, body }))
-        : call(api.POST('/categories', { body }))
+      return category ? call(api.PUT('/categories/{id}', { params: { path: { id: category.id! } }, body })) : call(api.POST('/categories', { body }))
     },
     { success: category ? 'Category saved' : 'Category created', invalidate: [['categories'], ['courses']], onSuccess: onClose },
   )
@@ -73,13 +74,20 @@ function Row({ category, onEdit }: { category: Category; onEdit: () => void }) {
   return (
     <TableRow>
       <TableCell className="font-medium">{category.name}</TableCell>
-      <TableCell className="text-muted-foreground">{category.description}</TableCell>
+      <TableCell className="text-muted-foreground">{category.description || '—'}</TableCell>
+      <TableCell className="text-muted-foreground">{formatDate(category.created_at)}</TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-1">
           <Button size="xs" variant="outline" onClick={onEdit}>
             Edit
           </Button>
-          <ConfirmButton size="xs" title={`Delete "${category.name}"?`} description="A category that has courses cannot be deleted." onConfirm={() => remove.mutate(undefined)} pending={remove.isPending}>
+          <ConfirmButton
+            size="xs"
+            title={`Delete "${category.name}"?`}
+            description="A category that has courses cannot be deleted."
+            onConfirm={() => remove.mutate(undefined)}
+            pending={remove.isPending}
+          >
             Delete
           </ConfirmButton>
         </div>
@@ -94,32 +102,38 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Categories</h1>
-        <Button onClick={() => setDialog({})}>
-          <Plus /> New category
-        </Button>
-      </div>
+      <PageHeader
+        title="Categories"
+        description={categories.data ? `${plural(categories.data.total, 'category')}. Courses are grouped by them in the catalog.` : undefined}
+        actions={
+          <Button onClick={() => setDialog({})}>
+            <Plus /> New category
+          </Button>
+        }
+      />
 
       {categories.isPending && <LoadingBlock />}
       {categories.isError && <ErrorBlock error={categories.error} />}
       {categories.data?.items?.length === 0 && <Empty title="No categories yet" />}
 
       {(categories.data?.items?.length ?? 0) > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.data?.items?.map((category) => (
-              <Row key={category.id} category={category} onEdit={() => setDialog({ category })} />
-            ))}
-          </TableBody>
-        </Table>
+        <TableCard>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {categories.data?.items?.map((category) => (
+                <Row key={category.id} category={category} onEdit={() => setDialog({ category })} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableCard>
       )}
 
       {dialog && <CategoryDialog category={dialog.category} onClose={() => setDialog(null)} />}

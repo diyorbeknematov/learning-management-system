@@ -66,14 +66,15 @@ export default function LoginPage() {
           </p>
         )}
 
-        <div className="flex items-center justify-between">
-          <Link to="/forgot-password" className="text-sm underline">
+        <div className="flex justify-end">
+          <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
             Forgot the password?
           </Link>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Logging in…' : 'Log in'}
-          </Button>
         </div>
+
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in…' : 'Log in'}
+        </Button>
       </form>
     </AuthCard>
   )

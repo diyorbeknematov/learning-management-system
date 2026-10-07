@@ -8,10 +8,12 @@ import { api, call } from '@/api/client'
 import { useAuth } from '@/auth/context'
 import { FormField } from '@/components/FormField'
 import { ImageUpload } from '@/components/ImageUpload'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { fullName } from '@/lib/format'
 import { errorMessage } from '@/lib/query'
 import { applyApiErrors, email, password, required, username } from '@/lib/validation'
 
@@ -25,7 +27,7 @@ const profileSchema = z.object({
 
 type ProfileValues = z.infer<typeof profileSchema>
 
-function AvatarCard() {
+function IdentityCard() {
   const { user, setUser } = useAuth()
 
   const save = useMutation({
@@ -37,14 +39,23 @@ function AvatarCard() {
     onError: (error) => toast.error(errorMessage(error)),
   })
 
+  const name = fullName(user)
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Photo</CardTitle>
-        <CardDescription>It is shown in the menu and, for instructors, on the course page.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ImageUpload purpose="avatar" label="Your photo" previewUrl={user?.avatar_url} onUploaded={(key) => save.mutate(key)} />
+    <Card className="items-center text-center lg:sticky lg:top-20 lg:self-start">
+      <CardContent className="flex w-full flex-col items-center gap-4">
+        <Avatar className="size-28 text-3xl">
+          <AvatarImage src={user?.avatar_url} alt="" />
+          <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold">{name}</h1>
+          <p className="text-sm text-muted-foreground">@{user?.username}</p>
+          <Badge variant="secondary">{user?.role_name}</Badge>
+        </div>
+        <div className="w-full border-t pt-4">
+          <ImageUpload purpose="avatar" label="Change the photo" previewUrl={undefined} onUploaded={(key) => save.mutate(key)} />
+        </div>
       </CardContent>
     </Card>
   )
@@ -171,10 +182,12 @@ function PasswordForm() {
 
 export default function ProfilePage() {
   return (
-    <div className="space-y-6">
-      <AvatarCard />
-      <ProfileForm />
-      <PasswordForm />
+    <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]">
+      <IdentityCard />
+      <div className="space-y-6">
+        <ProfileForm />
+        <PasswordForm />
+      </div>
     </div>
   )
 }

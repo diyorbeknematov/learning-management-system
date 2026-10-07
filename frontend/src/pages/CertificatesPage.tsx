@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { api, call, downloadFile } from '@/api/client'
+import { PageHeader } from '@/components/PageHeader'
 import { Empty, ErrorBlock, LoadingBlock } from '@/components/States'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,7 +33,7 @@ export default function CertificatesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">My certificates</h1>
+      <PageHeader title="My certificates" description="Download a certificate or share its public page." />
 
       {certificates.isPending && <LoadingBlock rows={2} />}
       {certificates.isError && <ErrorBlock error={certificates.error} />}
@@ -41,7 +42,7 @@ export default function CertificatesPage() {
         <Empty title="No certificates yet">A certificate is issued when you finish all the lessons and pass the final quiz.</Empty>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {certificates.data?.map((certificate) => (
           <Card key={certificate.id}>
             <CardHeader>

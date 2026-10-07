@@ -1,6 +1,8 @@
+import { courseGrid } from '@/components/layout/grids'
 import { Link } from 'react-router'
 import { useMyEnrollments } from '@/api/queries'
 import { CourseCover } from '@/components/CourseCard'
+import { PageHeader } from '@/components/PageHeader'
 import { Empty, ErrorBlock, LoadingBlock } from '@/components/States'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -12,24 +14,32 @@ export default function MyCoursesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">My courses</h1>
+      <PageHeader
+        title="My courses"
+        description="Everything you study, with your progress."
+        actions={
+          <Link to="/courses" className={buttonVariants({ variant: 'outline' })}>
+            Find more courses
+          </Link>
+        }
+      />
 
       {enrollments.isPending && <LoadingBlock />}
       {enrollments.isError && <ErrorBlock error={enrollments.error} />}
 
       {enrollments.data?.items?.length === 0 && (
         <Empty title="You have not enrolled in any course yet">
-          <Link to="/" className="underline">
+          <Link to="/courses" className="underline">
             Find a course
           </Link>
         </Empty>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className={courseGrid}>
         {enrollments.data?.items
           ?.filter((item) => item.status !== 'dropped')
           .map((item) => (
-            <Card key={item.id} className="overflow-hidden">
+            <Card key={item.id} className="overflow-hidden pt-0">
               <CourseCover url={item.course_cover_url} title={item.course_title} className="h-32 w-full object-cover" />
               <div className="flex flex-1 flex-col gap-3 px-4 pb-4">
                 <div className="flex items-start justify-between gap-2">

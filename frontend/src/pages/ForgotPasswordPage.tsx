@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Sending…' : 'Send the link'}
         </Button>
       </form>

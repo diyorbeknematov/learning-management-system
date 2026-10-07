@@ -40,3 +40,10 @@ export function fullName(person?: { first_name?: string; last_name?: string; use
 export function capitalize(text?: string | null): string {
   return text ? text.charAt(0).toUpperCase() + text.slice(1) : ''
 }
+
+/** "1 course", "2 courses". */
+export function plural(count: number | undefined | null, word: string): string {
+  const n = count ?? 0
+
+  return `${n} ${n === 1 ? word : word + 's'}`
+}

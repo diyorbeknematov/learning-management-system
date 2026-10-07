@@ -1,3 +1,4 @@
+import { TableCard } from '@/components/Panels'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 type Row = Record<string, unknown>
@@ -20,29 +21,31 @@ function cell(value: unknown): string {
 
 /** A table whose columns are the keys of the rows; ids are left out. */
 export function DataTable({ rows }: { rows: Row[] }) {
-  if (rows.length === 0) return <p className="text-sm text-muted-foreground">No data for this period.</p>
+  if (rows.length === 0) return <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">No data for this period.</p>
 
   const columns = Object.keys(rows[0]).filter((key) => key !== 'id' && !key.endsWith('_id') && !key.endsWith('_ids'))
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((key) => (
-            <TableHead key={key}>{title(key)}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row, index) => (
-          <TableRow key={index}>
+    <TableCard>
+      <Table>
+        <TableHeader>
+          <TableRow>
             {columns.map((key) => (
-              <TableCell key={key}>{cell(row[key])}</TableCell>
+              <TableHead key={key}>{title(key)}</TableHead>
             ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, index) => (
+            <TableRow key={index}>
+              {columns.map((key) => (
+                <TableCell key={key}>{cell(row[key])}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableCard>
   )
 }
 

@@ -1,20 +1,33 @@
 import { useQuery } from '@tanstack/react-query'
-import { Plus, Search } from 'lucide-react'
+import { MoreHorizontal, Plus, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api, call } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useAuth } from '@/auth/context'
-import { ConfirmButton } from '@/components/ConfirmButton'
+import { PageHeader } from '@/components/PageHeader'
+import { TableCard, Toolbar } from '@/components/Panels'
+import { StatusBadge } from '@/components/StatusBadge'
 import { NativeSelect } from '@/components/NativeSelect'
 import { Pagination } from '@/components/Pagination'
 import { Empty, ErrorBlock, LoadingBlock } from '@/components/States'
-import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { fullName } from '@/lib/format'
+import { formatDate, fullName, plural } from '@/lib/format'
 import { useApiMutation } from '@/lib/mutations'
 import { applyApiErrors } from '@/lib/validation'
 import { useForm } from 'react-hook-form'
@@ -25,7 +38,12 @@ type Role = 'SuperAdmin' | 'Instructor' | 'Student'
 const LIMIT = 20
 
 function UserDialog({ user, onClose }: { user?: User; onClose: () => void }) {
-  const { register, handleSubmit, setError, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       first_name: user?.first_name ?? '',
       last_name: user?.last_name ?? '',
@@ -101,6 +119,7 @@ function UserDialog({ user, onClose }: { user?: User; onClose: () => void }) {
 
 function UserRow({ user, isMe, onEdit }: { user: User; isMe: boolean; onEdit: () => void }) {
   const blocked = user.status === 'blocked'
+  const [asking, setAsking] = useState(false)
 
   const status = useApiMutation(
     () => call(api.PATCH('/users/{id}/status', { params: { path: { id: user.id! } }, body: { status: blocked ? 'active' : 'blocked' } })),
@@ -111,34 +130,75 @@ function UserRow({ user, isMe, onEdit }: { user: User; isMe: boolean; onEdit: ()
     invalidate: [['users']],
   })
 
+  const name = fullName(user)
+
   return (
     <TableRow>
       <TableCell>
-        <div className="font-medium">{fullName(user)}</div>
-        <div className="text-xs text-muted-foreground">
-          @{user.username} · {user.email}
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={user.avatar_url} alt="" />
+            <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <div className="font-medium">{name}</div>
+            <div className="text-xs text-muted-foreground">
+              @{user.username} · {user.email}
+            </div>
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant="secondary">{user.role_name}</Badge>
+        <StatusBadge value={user.role_name} />
       </TableCell>
-      <TableCell>{blocked ? <Badge variant="outline">Blocked</Badge> : <Badge>Active</Badge>}</TableCell>
+      <TableCell>
+        <StatusBadge value={user.status} />
+      </TableCell>
+      <TableCell className="text-muted-foreground">{formatDate(user.created_at)}</TableCell>
       <TableCell className="text-right">
-        <div className="flex justify-end gap-1">
-          <Button size="xs" variant="outline" onClick={onEdit}>
+        <div className="flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={onEdit}>
             Edit
           </Button>
           {!isMe && (
-            <>
-              <Button size="xs" variant="outline" disabled={status.isPending} onClick={() => status.mutate(undefined)}>
-                {blocked ? 'Unblock' : 'Block'}
-              </Button>
-              <ConfirmButton size="xs" title={`Delete ${fullName(user)}?`} description="The user cannot log in any more." onConfirm={() => remove.mutate(undefined)} pending={remove.isPending}>
-                Delete
-              </ConfirmButton>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="inline-flex size-7 items-center justify-center rounded-lg border outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+                aria-label={`More actions for ${name}`}
+              >
+                <MoreHorizontal className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => status.mutate(undefined)}>{blocked ? 'Unblock' : 'Block'}</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive" onClick={() => setAsking(true)}>
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
+
+        <AlertDialog open={asking} onOpenChange={setAsking}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {name}?</AlertDialogTitle>
+              <AlertDialogDescription>The user cannot log in any more.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={() => {
+                  setAsking(false)
+                  remove.mutate(undefined)
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   )
@@ -167,7 +227,15 @@ export default function UsersPage() {
     queryFn: () =>
       call(
         api.GET('/users', {
-          params: { query: { search: search || undefined, role: (role || undefined) as Role | undefined, status: (status || undefined) as 'active' | 'blocked' | undefined, page, limit: LIMIT } },
+          params: {
+            query: {
+              search: search || undefined,
+              role: (role || undefined) as Role | undefined,
+              status: (status || undefined) as 'active' | 'blocked' | undefined,
+              page,
+              limit: LIMIT,
+            },
+          },
         }),
       ),
     placeholderData: (previous) => previous,
@@ -175,51 +243,73 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Users</h1>
-        <Button onClick={() => setDialog({})}>
-          <Plus /> New user
-        </Button>
-      </div>
+      <PageHeader
+        title="Users"
+        description={users.data ? `${plural(users.data.total, 'user')} on the platform` : 'People who use the platform'}
+        actions={
+          <Button onClick={() => setDialog({})}>
+            <Plus /> New user
+          </Button>
+        }
+      />
 
-      <div className="grid gap-3 sm:grid-cols-4">
-        <div className="relative sm:col-span-2">
+      <Toolbar>
+        <div className="relative min-w-64 flex-1">
           <Search className="pointer-events-none absolute left-2.5 top-2 size-4 text-muted-foreground" />
           <Input className="pl-8" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Name, username or email" aria-label="Search users" />
         </div>
-        <NativeSelect aria-label="Role" value={role} onChange={(e) => { setRole(e.target.value); setPage(1) }}>
+        <NativeSelect
+          aria-label="Role"
+          className="w-44"
+          value={role}
+          onChange={(e) => {
+            setRole(e.target.value)
+            setPage(1)
+          }}
+        >
           <option value="">All roles</option>
           <option value="Student">Students</option>
           <option value="Instructor">Instructors</option>
           <option value="SuperAdmin">SuperAdmins</option>
         </NativeSelect>
-        <NativeSelect aria-label="Status" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }}>
+        <NativeSelect
+          aria-label="Status"
+          className="w-44"
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value)
+            setPage(1)
+          }}
+        >
           <option value="">Any status</option>
           <option value="active">Active</option>
           <option value="blocked">Blocked</option>
         </NativeSelect>
-      </div>
+      </Toolbar>
 
       {users.isPending && <LoadingBlock />}
       {users.isError && <ErrorBlock error={users.error} />}
       {users.data?.items?.length === 0 && <Empty title="No users found" />}
 
       {(users.data?.items?.length ?? 0) > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.data?.items?.map((user) => (
-              <UserRow key={user.id} user={user} isMe={user.id === me?.id} onEdit={() => setDialog({ user })} />
-            ))}
-          </TableBody>
-        </Table>
+        <TableCard>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.data?.items?.map((user) => (
+                <UserRow key={user.id} user={user} isMe={user.id === me?.id} onEdit={() => setDialog({ user })} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableCard>
       )}
 
       <Pagination page={page} limit={LIMIT} total={users.data?.total ?? 0} onPage={setPage} />

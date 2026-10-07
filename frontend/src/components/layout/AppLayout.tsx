@@ -1,4 +1,5 @@
-import { Link, NavLink, Outlet } from 'react-router'
+import { GraduationCap } from 'lucide-react'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { buttonVariants } from '@/components/ui/button'
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
-import { useNavigate } from 'react-router'
+import { container } from './container'
 
 function UserMenu() {
   const { user, logout } = useAuth()
@@ -40,6 +41,7 @@ function UserMenu() {
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/dashboard')}>Dashboard</DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
         <DropdownMenuItem
           onClick={async () => {
@@ -54,63 +56,69 @@ function UserMenu() {
   )
 }
 
+const year = new Date().getFullYear()
+
+const link = ({ isActive }: { isActive: boolean }) =>
+  cn('whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-medium text-foreground')
+
 export function AppLayout() {
   const { user, loading } = useAuth()
+  const role = user?.role_name
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4">
-          <Link to="/" className="font-semibold">
-            LMS
+      <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
+        <div className={`${container} flex h-14 items-center gap-4`}>
+          <Link to="/" className="flex shrink-0 items-center gap-2 font-semibold">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <GraduationCap className="size-5" />
+            </span>
+            <span className="hidden sm:inline">LMS Academy</span>
           </Link>
 
-          <nav className="flex flex-1 items-center gap-4 text-sm">
+          <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="Main">
+            <NavLink to="/courses" className={link}>
+              Courses
+            </NavLink>
             {user && (
-              <NavLink to="/dashboard" className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
+              <NavLink to="/dashboard" className={link}>
                 Dashboard
               </NavLink>
             )}
-            <NavLink to="/" end className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
-              Courses
-            </NavLink>
-            {(user?.role_name === 'Instructor' || user?.role_name === 'SuperAdmin') && (
-              <NavLink to="/teach/courses" className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
-                Teach
-              </NavLink>
-            )}
-            {user?.role_name === 'SuperAdmin' && (
+            {role === 'Student' && (
               <>
-                {[
-                  ['/admin/users', 'Users'],
-                  ['/admin/categories', 'Categories'],
-                  ['/admin/payments', 'Payments'],
-                  ['/admin/finance', 'Finance'],
-                  ['/admin/reports', 'Reports'],
-                ].map(([to, label]) => (
-                  <NavLink key={to} to={to} className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
-                    {label}
-                  </NavLink>
-                ))}
-              </>
-            )}
-            {user?.role_name === 'Student' && (
-              <>
-                <NavLink to="/my-courses" className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
+                <NavLink to="/my-courses" className={link}>
                   My courses
                 </NavLink>
-                <NavLink to="/certificates" className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
+                <NavLink to="/certificates" className={link}>
                   Certificates
                 </NavLink>
               </>
             )}
+            {(role === 'Instructor' || role === 'SuperAdmin') && (
+              <NavLink to="/teach/courses" className={link}>
+                Teach
+              </NavLink>
+            )}
+            {role === 'SuperAdmin' &&
+              [
+                ['/admin/users', 'Users'],
+                ['/admin/categories', 'Categories'],
+                ['/admin/payments', 'Payments'],
+                ['/admin/finance', 'Finance'],
+                ['/admin/reports', 'Reports'],
+              ].map(([to, label]) => (
+                <NavLink key={to} to={to} className={link}>
+                  {label}
+                </NavLink>
+              ))}
           </nav>
 
           {!loading &&
             (user ? (
               <UserMenu />
             ) : (
-              <div className="flex gap-2">
+              <div className="flex shrink-0 gap-2">
                 <Link to="/login" className={buttonVariants({ variant: 'ghost' })}>
                   Log in
                 </Link>
@@ -122,9 +130,23 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      <main className="flex-1">
         <Outlet />
       </main>
+
+      <footer className="border-t">
+        <div className={`${container} flex flex-wrap items-center justify-between gap-2 py-6 text-sm text-muted-foreground`}>
+          <span>© {year} LMS Academy</span>
+          <nav className="flex gap-4" aria-label="Footer">
+            <Link to="/courses" className="hover:text-foreground">
+              Courses
+            </Link>
+            <Link to="/verify" className="hover:text-foreground">
+              Check a certificate
+            </Link>
+          </nav>
+        </div>
+      </footer>
 
       <Toaster />
     </div>

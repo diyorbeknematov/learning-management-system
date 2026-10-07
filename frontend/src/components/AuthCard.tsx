@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
-/** The frame of the login, register and password pages. */
+/** The heading, the form and the line below it of the login, register and password pages. */
 export function AuthCard({
   title,
   description,
@@ -14,13 +13,15 @@ export function AuthCard({
   children: ReactNode
 }) {
   return (
-    <Card className="mx-auto w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-      {footer && <CardFooter className="text-sm">{footer}</CardFooter>}
-    </Card>
+    <div className="space-y-6">
+      <div className="space-y-1.5">
+        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+        {description && <p className="text-muted-foreground">{description}</p>}
+      </div>
+
+      {children}
+
+      {footer && <div className="text-sm text-muted-foreground [&_a]:font-medium [&_a]:text-primary">{footer}</div>}
+    </div>
   )
 }

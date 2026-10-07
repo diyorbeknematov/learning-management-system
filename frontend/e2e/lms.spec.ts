@@ -112,7 +112,7 @@ test.describe('the instructor builds the course', () => {
     await expect(teacher.locator('img[src*="covers/"]')).toBeVisible()
   })
 
-  test('adds a module, a lesson and a text material', async () => {
+  test('adds modules and lessons: one free preview, one locked', async () => {
     await teacher.goto(`/teach/courses/${courseId}?tab=content`)
 
     await teacher.getByRole('button', { name: 'Add a module' }).click()
@@ -123,13 +123,32 @@ test.describe('the instructor builds the course', () => {
     await teacher.getByRole('button', { name: 'Add a lesson' }).click()
     await teacher.getByLabel('Title').fill('Hello world')
     await teacher.getByLabel('Duration (minutes)').fill('10')
+    await teacher.getByLabel('Free preview: visitors can open this lesson').check()
     await teacher.getByRole('button', { name: 'Save' }).click()
     await expect(teacher.getByText('1. Hello world')).toBeVisible()
 
-    await teacher.getByRole('button', { name: 'Materials' }).click()
+    await teacher.getByRole('button', { name: 'Add a module' }).click()
+    await teacher.getByLabel('Title').fill('Advanced')
+    await teacher.getByRole('button', { name: 'Save' }).click()
+    await expect(teacher.getByText('2. Advanced')).toBeVisible()
+
+    await teacher.getByRole('button', { name: 'Add a lesson' }).last().click()
+    await teacher.getByLabel('Title').fill('Deep dive')
+    await teacher.getByRole('button', { name: 'Save' }).click()
+    await expect(teacher.getByText('1. Deep dive')).toBeVisible()
+  })
+
+  test('adds a text material to each lesson', async () => {
+    await teacher.getByRole('button', { name: 'Materials' }).first().click()
     await teacher.getByLabel('Text', { exact: true }).fill('fmt.Println("hello")')
     await teacher.getByRole('button', { name: 'Add the material' }).click()
     await expect(teacher.getByText('fmt.Println("hello")')).toBeVisible()
+    await teacher.keyboard.press('Escape')
+
+    await teacher.getByRole('button', { name: 'Materials' }).last().click()
+    await teacher.getByLabel('Text', { exact: true }).fill('the secret part')
+    await teacher.getByRole('button', { name: 'Add the material' }).click()
+    await expect(teacher.getByText('the secret part')).toBeVisible()
     await teacher.keyboard.press('Escape')
   })
 
@@ -159,17 +178,42 @@ test.describe('the instructor builds the course', () => {
 
 test.describe('a visitor', () => {
   test('finds the course by its title and opens it', async () => {
-    await visitor.goto(`/?q=${encodeURIComponent(courseTitle)}`)
-    await expect(visitor.getByText('1 courses')).toBeVisible()
+    await visitor.goto(`/courses?q=${encodeURIComponent(courseTitle)}`)
+    await expect(visitor.getByText('1 course', { exact: true })).toBeVisible()
 
     await visitor.getByRole('link', { name: new RegExp(courseTitle) }).click()
     await expect(visitor.getByText('Write Go programs')).toBeVisible()
-    await expect(visitor.getByText('Hello world')).toBeVisible()
     await expect(visitor.getByRole('link', { name: 'Log in to enroll' })).toBeVisible()
+
+    // the names of all lessons are shown; only the free preview can be opened
+    await expect(visitor.getByText('Deep dive')).toBeVisible()
+    await expect(visitor.getByLabel('Locked')).toHaveCount(1)
+  })
+
+  test('opens the free preview lesson, but not the locked one', async () => {
+    await visitor.getByRole('link', { name: /Hello world/ }).click()
+    await expect(visitor).toHaveURL(/\/preview\//)
+    await expect(visitor.getByText('fmt.Println("hello")')).toBeVisible()
+    await expect(visitor.getByText('Like what you see?')).toBeVisible()
+    await expect(visitor.getByLabel('Locked')).toBeVisible()
+    await expect(visitor.getByText('the secret part')).toHaveCount(0)
+  })
+
+  test('the home page shows the categories and the popular courses', async () => {
+    await visitor.goto('/')
+    await expect(visitor.getByRole('heading', { name: /Learn something new/ })).toBeVisible()
+    await expect(visitor.getByRole('region', { name: 'Categories' })).toBeVisible()
+    await expect(visitor.getByRole('region', { name: 'Popular courses' }).getByRole('link').first()).toBeVisible()
+
+    // the search of the home page leads to the catalog
+    await visitor.getByLabel('Search courses').fill(courseTitle)
+    await visitor.getByRole('button', { name: 'Search' }).click()
+    await expect(visitor).toHaveURL(/\/courses\?q=/)
+    await expect(visitor.getByText('1 course', { exact: true })).toBeVisible()
   })
 
   test('sees nothing when the search finds nothing', async () => {
-    await visitor.goto('/?q=zzzz-no-such-course')
+    await visitor.goto('/courses?q=zzzz-no-such-course')
     await expect(visitor.getByText('No course matches your search')).toBeVisible()
   })
 })
@@ -198,7 +242,11 @@ test.describe('a student', () => {
     await expect(learner).toHaveURL(/\/lessons\//)
     await expect(learner.getByText('fmt.Println("hello")')).toBeVisible()
 
+    // marking a lesson done opens the next one
     await learner.getByRole('button', { name: 'Mark as done' }).click()
+    await expect(learner.getByText('the secret part')).toBeVisible()
+    await learner.getByRole('button', { name: 'Mark as done' }).click()
+    await expect(learner.getByRole('button', { name: 'Mark as not done' })).toBeVisible()
     await learner.goto('/my-courses')
     await expect(learner.getByText('100%')).toBeVisible()
   })
@@ -257,7 +305,7 @@ test.describe('afterwards', () => {
   test('the instructor sees the student with the progress', async () => {
     await teacher.goto(`/teach/courses/${courseId}?tab=students`)
     await expect(teacher.getByText('Sam Student')).toBeVisible()
-    await expect(teacher.getByText('1 of 1 lessons')).toBeVisible()
+    await expect(teacher.getByText('2 of 2 lessons')).toBeVisible()
   })
 
   test('the SuperAdmin sees the money and the reports', async () => {
@@ -276,7 +324,8 @@ test.describe('afterwards', () => {
     await admin.goto('/admin/users')
     await admin.getByLabel('Search users').fill(student.username)
     await expect(admin.getByRole('row')).toHaveCount(2)
-    await admin.getByRole('button', { name: 'Block', exact: true }).click()
+    await admin.getByRole('button', { name: /More actions for/ }).click()
+    await admin.getByRole('menuitem', { name: 'Block' }).click()
     await expect(admin.getByRole('cell', { name: 'Blocked' })).toBeVisible()
 
     // an access token carries its time in seconds; the block counts from the next one

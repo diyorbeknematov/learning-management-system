@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueries, useQueryClient } from '@tanstack/react-query'
-import { Check, ChevronRight, Circle, FileText, ListChecks, PlayCircle } from 'lucide-react'
+import { Check, ChevronRight, Circle, ListChecks } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { api, call } from '@/api/client'
 import { useMyEnrollments } from '@/api/queries'
+import { LessonMaterials } from '@/components/LessonMaterials'
 import { ErrorBlock, LoadingBlock } from '@/components/States'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -11,42 +12,6 @@ import { Progress } from '@/components/ui/progress'
 import { duration } from '@/lib/format'
 import { errorMessage } from '@/lib/query'
 import { cn } from '@/lib/utils'
-
-function Materials({ lessonId }: { lessonId: string }) {
-  const materials = useQuery({
-    queryKey: ['materials', lessonId],
-    queryFn: () => call(api.GET('/lessons/{lessonId}/materials', { params: { path: { lessonId } } })),
-  })
-
-  if (materials.isPending) return <LoadingBlock rows={2} />
-  if (materials.isError) return <ErrorBlock error={materials.error} />
-  if (materials.data.length === 0) return <p className="text-sm text-muted-foreground">This lesson has no materials yet.</p>
-
-  return (
-    <div className="space-y-4">
-      {materials.data.map((material) => (
-        <article key={material.id} className="rounded-lg border p-4">
-          {material.type === 'text' && <p className="whitespace-pre-line leading-relaxed">{material.content}</p>}
-
-          {material.type === 'video' && (
-            <a href={material.content} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 underline">
-              <PlayCircle className="size-5" /> Watch the video
-            </a>
-          )}
-
-          {material.type === 'file' && (
-            <a href={material.file_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 underline">
-              <FileText className="size-5" /> {material.file_name ?? 'Download the file'}
-              {material.file_size ? (
-                <span className="text-xs text-muted-foreground">({(material.file_size / 1024 / 1024).toFixed(1)} MB)</span>
-              ) : null}
-            </a>
-          )}
-        </article>
-      ))}
-    </div>
-  )
-}
 
 // The place where a student studies: the lessons of the course on the left, the
 // lesson with its materials on the right.
@@ -117,7 +82,7 @@ export default function LearnPage() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[20rem_1fr]">
-      <aside className="space-y-4">
+      <aside className="space-y-4 rounded-xl border bg-card p-5 lg:sticky lg:top-20 lg:self-start">
         <div className="space-y-2">
           <Link to={`/courses/${courseId}`} className="font-semibold hover:underline">
             {course.data.title}
@@ -196,7 +161,7 @@ export default function LearnPage() {
               {current.is_preview && <Badge variant="secondary">Preview</Badge>}
             </div>
 
-            <Materials lessonId={current.id!} />
+            <LessonMaterials lessonId={current.id!} />
 
             <div className="flex flex-wrap items-center gap-3 border-t pt-4">
               <Button

@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Saving…' : 'Change the password'}
         </Button>
       </form>

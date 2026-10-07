@@ -6,6 +6,8 @@ import { downloadFile } from '@/api/client'
 import { api } from '@/api/client'
 import { DataTable, columnTitle } from '@/components/DataTable'
 import { DateRange } from '@/components/DateRange'
+import { PageHeader } from '@/components/PageHeader'
+import { Toolbar } from '@/components/Panels'
 import { NativeSelect } from '@/components/NativeSelect'
 import { ErrorBlock, LoadingBlock } from '@/components/States'
 import { Button } from '@/components/ui/button'
@@ -38,7 +40,7 @@ function Result({ data }: { data: unknown }) {
       {entries.map(([key, value]) =>
         Array.isArray(value) ? (
           <section key={key} className="space-y-2">
-            <h2 className="text-lg font-medium">{columnTitle(key)}</h2>
+            <h2 className="text-lg font-medium">{key === 'rows' ? 'Details' : columnTitle(key)}</h2>
             <DataTable rows={value as Row[]} />
           </section>
         ) : (
@@ -64,7 +66,11 @@ export default function ReportsPage() {
     queryKey: ['report', report, range],
     queryFn: async () => {
       // the reports have different shapes, so the generic client is used
-      const { data: body, error, response } = await api.GET(`/reports/${report}` as '/reports/enrollments', { params: { query: { from: range.from || undefined, to: range.to || undefined } } })
+      const {
+        data: body,
+        error,
+        response,
+      } = await api.GET(`/reports/${report}` as '/reports/enrollments', { params: { query: { from: range.from || undefined, to: range.to || undefined } } })
 
       if (!response.ok) {
         const failure = (error ?? {}) as { error?: { code?: string; message?: string } }
@@ -89,14 +95,16 @@ export default function ReportsPage() {
     }
   }
 
+  const current = reports.find((item) => item.value === report)
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Reports</h1>
+      <PageHeader title="Reports" description="Numbers about students, courses, quizzes and money. Download any of them as a CSV file." />
 
-      <div className="grid max-w-2xl grid-cols-2 items-end gap-3 sm:grid-cols-4">
+      <Toolbar>
         <div className="space-y-1.5">
           <Label htmlFor="report">Report</Label>
-          <NativeSelect id="report" value={report} onChange={(e) => setReport(e.target.value as Report)}>
+          <NativeSelect id="report" className="w-56" value={report} onChange={(e) => setReport(e.target.value as Report)}>
             {reports.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
@@ -104,11 +112,15 @@ export default function ReportsPage() {
             ))}
           </NativeSelect>
         </div>
-        <DateRange from={range.from} to={range.to} onChange={setRange} />
-        <Button variant="outline" disabled={busy} onClick={csv}>
+        <div className="grid w-80 grid-cols-2 gap-3">
+          <DateRange from={range.from} to={range.to} onChange={setRange} />
+        </div>
+        <Button variant="outline" className="ml-auto" disabled={busy} onClick={csv}>
           <Download /> {busy ? 'Preparing…' : 'Download CSV'}
         </Button>
-      </div>
+      </Toolbar>
+
+      <h2 className="text-xl font-semibold">{current?.label}</h2>
 
       {data.isPending && <LoadingBlock />}
       {data.isError && <ErrorBlock error={data.error} />}

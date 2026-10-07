@@ -71,7 +71,7 @@ export default function RegisterPage() {
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Creating…' : 'Sign up'}
         </Button>
       </form>
