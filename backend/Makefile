@@ -7,7 +7,7 @@ DB_URL := postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmo
 
 .DEFAULT_GOAL := help
 
-.PHONY: help run build test vet fmt tidy check swagger postman \
+.PHONY: help run build test vet fmt tidy check swagger postman seed \
 	mig-up mig-down mig-force mig-version mig-create \
 	up down logs reset
 
@@ -35,6 +35,11 @@ tidy: ## go mod tidy
 	go mod tidy
 
 check: fmt vet test ## fmt + vet + test
+
+# --- demo data
+
+seed: ## Fill the running system with demo data (needs ADMIN_PASSWORD; SEED_API if the API is not on :8080)
+	@$(LOAD_ENV) go run ./cmd/seed
 
 # --- API documentation (needs swag: go install github.com/swaggo/swag/cmd/swag@v1.16.4)
 

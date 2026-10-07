@@ -41,6 +41,10 @@ Useful commands: `make logs` (API logs), `make down` (stop, data stays), `make r
 
 `make help` lists every command: tests (`make test`, they need PostgreSQL and Redis and are skipped without them), migrations, formatting and so on.
 
+### Demo data
+
+`make seed` fills the running system with something to look at: 3 categories, 2 instructors, 5 students, 4 published courses (and a draft) with lessons, materials and a final quiz, enrollments at every stage (just started, half way, finished with a certificate, quiz failed), paid courses with payments and instructor payouts, and reviews. Everybody it creates has the password `Demo-Passw0rd!2024` (`ali.teacher`, `sara.teacher`, `student1` ... `student5`); the SuperAdmin is yours. It needs `ADMIN_PASSWORD` (from `.env`; for Docker: `ADMIN_PASSWORD='Admin-Passw0rd!2024' make seed`), and `SEED_API=http://localhost:<port>` if the API is not on 8080. It only uses the public API, so it is safe to run again: what exists is left as it is. The login rate limit (10 a minute) can make a second run wait up to a minute.
+
 ### Files and MinIO
 
 Browsers upload files to MinIO directly and download them with temporary links. Those links are signed for one address, so if the API reaches MinIO at an address the browser cannot (`minio:9000` inside Docker), set `MINIO_PUBLIC_ENDPOINT` to the address of the browser (`localhost:9000`). The compose file does this; without Docker it can stay empty.
