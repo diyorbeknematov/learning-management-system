@@ -1,0 +1,5868 @@
+basePath: /api/v1
+definitions:
+  handler.CategoryList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.CourseListItemList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.CourseListItem'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.EnrollmentRosterItemList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.EnrollmentRosterItem'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.MyEnrollmentList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.MyEnrollment'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.PaymentList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Payment'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.StudentProgressList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.StudentProgress'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.UserList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handler.lessonProgressRequest:
+    properties:
+      completed:
+        type: boolean
+    required:
+    - completed
+    type: object
+  models.AttemptAnswer:
+    properties:
+      attempt_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      option_id:
+        type: string
+      question_id:
+        type: string
+    type: object
+  models.AttemptDetail:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/models.AttemptAnswer'
+        type: array
+      attempt_number:
+        type: integer
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      passed:
+        type: boolean
+      quiz_id:
+        type: string
+      score:
+        type: integer
+      started_at:
+        type: string
+      student_id:
+        type: string
+      time_spent:
+        type: integer
+    type: object
+  models.AttemptResult:
+    properties:
+      attempt_number:
+        type: integer
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      passed:
+        type: boolean
+      quiz_id:
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/models.QuestionResult'
+        type: array
+      score:
+        type: integer
+      started_at:
+        type: string
+      student_id:
+        type: string
+      time_spent:
+        type: integer
+    type: object
+  models.AttemptView:
+    properties:
+      attempt_number:
+        type: integer
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      passed:
+        type: boolean
+      questions:
+        items:
+          $ref: '#/definitions/models.Question'
+        type: array
+      quiz_id:
+        type: string
+      score:
+        type: integer
+      started_at:
+        type: string
+      student_id:
+        type: string
+      time_spent:
+        type: integer
+    type: object
+  models.Category:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CertificateDetail:
+    properties:
+      completion_date:
+        type: string
+      course_id:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      instructor_name:
+        type: string
+      object_key:
+        type: string
+      qr_code:
+        type: string
+      student_id:
+        type: string
+      student_name:
+        type: string
+      unique_id:
+        type: string
+    type: object
+  models.CertificateReport:
+    properties:
+      rows:
+        items:
+          $ref: '#/definitions/models.CertificateReportRow'
+        type: array
+      trend:
+        items:
+          $ref: '#/definitions/models.TrendRow'
+        type: array
+    type: object
+  models.CertificateReportRow:
+    properties:
+      course_id:
+        type: string
+      course_title:
+        type: string
+      issued:
+        type: integer
+    type: object
+  models.CertificateVerification:
+    properties:
+      completion_date:
+        type: string
+      course_title:
+        type: string
+      instructor_name:
+        type: string
+      student_name:
+        type: string
+      unique_id:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  models.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  models.CourseDetail:
+    properties:
+      avg_rating:
+        type: number
+      category_id:
+        type: string
+      category_name:
+        type: string
+      cover:
+        type: string
+      cover_url:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      difficulty:
+        $ref: '#/definitions/models.Difficulty'
+      enrollment_count:
+        type: integer
+      id:
+        type: string
+      instructor:
+        $ref: '#/definitions/models.CourseInstructor'
+      instructor_id:
+        type: string
+      instructor_name:
+        type: string
+      language:
+        type: string
+      learning_outcomes:
+        items:
+          $ref: '#/definitions/models.CourseLearningOutcome'
+        type: array
+      lesson_count:
+        type: integer
+      modules:
+        items:
+          $ref: '#/definitions/models.ModuleDetail'
+        type: array
+      payout_type:
+        $ref: '#/definitions/models.PayoutType'
+      payout_value:
+        type: number
+      price:
+        type: number
+      requirements:
+        items:
+          $ref: '#/definitions/models.CourseRequirement'
+        type: array
+      review_count:
+        type: integer
+      status:
+        $ref: '#/definitions/models.CourseStatus'
+      title:
+        type: string
+      total_duration:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.CourseInstructor:
+    properties:
+      avatar:
+        type: string
+      avatar_url:
+        type: string
+      avg_rating:
+        type: number
+      bio:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+    type: object
+  models.CourseLearningOutcome:
+    properties:
+      content:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      position:
+        type: integer
+    type: object
+  models.CourseListItem:
+    properties:
+      avg_rating:
+        type: number
+      category_id:
+        type: string
+      category_name:
+        type: string
+      cover:
+        type: string
+      cover_url:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      difficulty:
+        $ref: '#/definitions/models.Difficulty'
+      enrollment_count:
+        type: integer
+      id:
+        type: string
+      instructor_id:
+        type: string
+      instructor_name:
+        type: string
+      language:
+        type: string
+      learning_outcomes:
+        items:
+          $ref: '#/definitions/models.CourseLearningOutcome'
+        type: array
+      lesson_count:
+        type: integer
+      payout_type:
+        $ref: '#/definitions/models.PayoutType'
+      payout_value:
+        type: number
+      price:
+        type: number
+      requirements:
+        items:
+          $ref: '#/definitions/models.CourseRequirement'
+        type: array
+      review_count:
+        type: integer
+      status:
+        $ref: '#/definitions/models.CourseStatus'
+      title:
+        type: string
+      total_duration:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.CourseProgress:
+    properties:
+      completed_lesson_ids:
+        items:
+          type: string
+        type: array
+      completed_lessons:
+        type: integer
+      course_id:
+        type: string
+      progress_percent:
+        type: number
+      total_lessons:
+        type: integer
+    type: object
+  models.CourseRequirement:
+    properties:
+      content:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      position:
+        type: integer
+    type: object
+  models.CourseStatus:
+    enum:
+    - draft
+    - published
+    type: string
+    x-enum-varnames:
+    - CourseStatusDraft
+    - CourseStatusPublished
+  models.CreateCategory:
+    properties:
+      description:
+        type: string
+      name:
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  models.CreateCourseRequest:
+    properties:
+      category_id:
+        type: string
+      cover:
+        type: string
+      description:
+        type: string
+      difficulty:
+        allOf:
+        - $ref: '#/definitions/models.Difficulty'
+        enum:
+        - beginner
+        - intermediate
+        - advanced
+      instructor_id:
+        type: string
+      language:
+        type: string
+      learning_outcomes:
+        items:
+          type: string
+        type: array
+      payout_type:
+        allOf:
+        - $ref: '#/definitions/models.PayoutType'
+        enum:
+        - percentage
+        - fixed
+      payout_value:
+        minimum: 0
+        type: number
+      price:
+        minimum: 0
+        type: number
+      requirements:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      total_duration:
+        minimum: 0
+        type: integer
+    required:
+    - category_id
+    - title
+    type: object
+  models.CreateLessonMaterial:
+    properties:
+      content:
+        type: string
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      mime_type:
+        type: string
+      object_key:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/models.MaterialType'
+        enum:
+        - text
+        - video
+        - file
+    required:
+    - type
+    type: object
+  models.CreateLessonRequest:
+    properties:
+      duration:
+        minimum: 0
+        type: integer
+      is_preview:
+        type: boolean
+      order_number:
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  models.CreateModuleRequest:
+    properties:
+      description:
+        type: string
+      order_number:
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  models.CreateQuestionOption:
+    properties:
+      is_correct:
+        type: boolean
+      option_text:
+        type: string
+    required:
+    - option_text
+    type: object
+  models.CreateQuestionRequest:
+    properties:
+      options:
+        items:
+          $ref: '#/definitions/models.CreateQuestionOption'
+        minItems: 2
+        type: array
+      order_number:
+        minimum: 1
+        type: integer
+      text:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/models.QuestionType'
+        enum:
+        - single_choice
+        - multiple_choice
+        - true_false
+    required:
+    - options
+    - text
+    - type
+    type: object
+  models.CreateQuiz:
+    properties:
+      description:
+        type: string
+      max_attempts:
+        type: integer
+      pass_threshold:
+        maximum: 100
+        minimum: 0
+        type: integer
+      time_limit:
+        type: integer
+      title:
+        type: string
+    required:
+    - max_attempts
+    - time_limit
+    - title
+    type: object
+  models.CreateReview:
+    properties:
+      comment:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    required:
+    - rating
+    type: object
+  models.CreateUserRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      email:
+        maxLength: 254
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      role:
+        enum:
+        - SuperAdmin
+        - Instructor
+        - Student
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - role
+    - username
+    type: object
+  models.Difficulty:
+    enum:
+    - beginner
+    - intermediate
+    - advanced
+    type: string
+    x-enum-varnames:
+    - DifficultyBeginner
+    - DifficultyIntermediate
+    - DifficultyAdvanced
+  models.Enrollment:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/models.EnrollmentStatus'
+      student_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.EnrollmentReport:
+    properties:
+      rows:
+        items:
+          $ref: '#/definitions/models.EnrollmentReportRow'
+        type: array
+      trend:
+        items:
+          $ref: '#/definitions/models.TrendRow'
+        type: array
+    type: object
+  models.EnrollmentReportRow:
+    properties:
+      active:
+        type: integer
+      completed:
+        type: integer
+      course_id:
+        type: string
+      course_title:
+        type: string
+      dropout_rate:
+        type: number
+      dropped:
+        type: integer
+      new_students:
+        type: integer
+      returning_students:
+        type: integer
+      total:
+        type: integer
+    type: object
+  models.EnrollmentRosterItem:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/models.EnrollmentStatus'
+      student_id:
+        type: string
+      student_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.EnrollmentStatus:
+    enum:
+    - active
+    - completed
+    - dropped
+    type: string
+    x-enum-varnames:
+    - EnrollmentStatusActive
+    - EnrollmentStatusCompleted
+    - EnrollmentStatusDropped
+  models.ExpenseSummary:
+    properties:
+      payouts:
+        items:
+          $ref: '#/definitions/models.InstructorPayout'
+        type: array
+      points:
+        items:
+          $ref: '#/definitions/models.FinancePoint'
+        type: array
+      total:
+        type: number
+    type: object
+  models.FinancePoint:
+    properties:
+      expenses:
+        type: number
+      period:
+        type: string
+      profit:
+        type: number
+      revenue:
+        type: number
+    type: object
+  models.FinanceSummary:
+    properties:
+      expenses:
+        type: number
+      net_profit:
+        type: number
+      points:
+        items:
+          $ref: '#/definitions/models.FinancePoint'
+        type: array
+      revenue:
+        type: number
+      status:
+        type: string
+    type: object
+  models.ForgotPasswordRequest:
+    properties:
+      email:
+        maxLength: 254
+        type: string
+    required:
+    - email
+    type: object
+  models.InstructorPayout:
+    properties:
+      amount:
+        type: number
+      course_id:
+        type: string
+      created_at:
+        type: string
+      enrollment_id:
+        type: string
+      id:
+        type: string
+      instructor_id:
+        type: string
+      type:
+        $ref: '#/definitions/models.PayoutType'
+      value:
+        type: number
+    type: object
+  models.InstructorReportRow:
+    properties:
+      avg_rating:
+        type: number
+      courses:
+        type: integer
+      full_name:
+        type: string
+      instructor_id:
+        type: string
+      revenue:
+        type: number
+      students:
+        type: integer
+    type: object
+  models.Lesson:
+    properties:
+      created_at:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: string
+      is_preview:
+        type: boolean
+      module_id:
+        type: string
+      order_number:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.LessonMaterial:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      file_url:
+        type: string
+      id:
+        type: string
+      lesson_id:
+        type: string
+      mime_type:
+        type: string
+      object_key:
+        type: string
+      type:
+        $ref: '#/definitions/models.MaterialType'
+      updated_at:
+        type: string
+    type: object
+  models.LessonProgress:
+    properties:
+      completed:
+        type: boolean
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      lesson_id:
+        type: string
+      student_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  models.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  models.MaterialType:
+    enum:
+    - text
+    - video
+    - file
+    type: string
+    x-enum-varnames:
+    - MaterialTypeText
+    - MaterialTypeVideo
+    - MaterialTypeFile
+  models.Module:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      order_number:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ModuleDetail:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      lessons:
+        items:
+          $ref: '#/definitions/models.Lesson'
+        type: array
+      order_number:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.MostFailedQuestionRow:
+    properties:
+      fail_count:
+        type: integer
+      question_id:
+        type: string
+      question_text:
+        type: string
+      quiz_title:
+        type: string
+    type: object
+  models.MyEnrollment:
+    properties:
+      completed_lessons:
+        type: integer
+      course_cover:
+        type: string
+      course_cover_url:
+        type: string
+      course_id:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      progress_percent:
+        type: number
+      status:
+        $ref: '#/definitions/models.EnrollmentStatus'
+      student_id:
+        type: string
+      total_lessons:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      enrollment_id:
+        type: string
+      id:
+        type: string
+      paid_at:
+        type: string
+      status:
+        $ref: '#/definitions/models.PaymentStatus'
+      updated_at:
+        type: string
+    type: object
+  models.PaymentStatus:
+    enum:
+    - paid
+    type: string
+    x-enum-varnames:
+    - PaymentStatusPaid
+  models.PayoutType:
+    enum:
+    - percentage
+    - fixed
+    type: string
+    x-enum-varnames:
+    - PayoutTypePercentage
+    - PayoutTypeFixed
+  models.PresignRequest:
+    properties:
+      content_type:
+        type: string
+      file_name:
+        type: string
+      purpose:
+        allOf:
+        - $ref: '#/definitions/models.UploadPurpose'
+        enum:
+        - avatar
+        - course_cover
+        - material
+    required:
+    - content_type
+    - file_name
+    - purpose
+    type: object
+  models.PresignResponse:
+    properties:
+      max_file_size:
+        type: integer
+      object_key:
+        type: string
+      upload_url:
+        type: string
+    type: object
+  models.ProgressFunnelRow:
+    properties:
+      lesson_id:
+        type: string
+      lesson_order:
+        type: integer
+      lesson_title:
+        type: string
+      module_order:
+        type: integer
+      students_completed:
+        type: integer
+    type: object
+  models.ProgressReport:
+    properties:
+      funnel:
+        items:
+          $ref: '#/definitions/models.ProgressFunnelRow'
+        type: array
+      rows:
+        items:
+          $ref: '#/definitions/models.ProgressReportRow'
+        type: array
+    type: object
+  models.ProgressReportRow:
+    properties:
+      avg_completion_rate:
+        type: number
+      course_id:
+        type: string
+      course_title:
+        type: string
+      inactive_students:
+        type: integer
+      students:
+        type: integer
+    type: object
+  models.Question:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/models.QuestionOption'
+        type: array
+      order_number:
+        type: integer
+      quiz_id:
+        type: string
+      text:
+        type: string
+      type:
+        $ref: '#/definitions/models.QuestionType'
+      updated_at:
+        type: string
+    type: object
+  models.QuestionOption:
+    properties:
+      id:
+        type: string
+      is_correct:
+        type: boolean
+      option_text:
+        type: string
+      question_id:
+        type: string
+    type: object
+  models.QuestionResult:
+    properties:
+      correct:
+        type: boolean
+      question_id:
+        type: string
+      selected_option_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  models.QuestionType:
+    enum:
+    - single_choice
+    - multiple_choice
+    - true_false
+    type: string
+    x-enum-varnames:
+    - QuestionTypeSingleChoice
+    - QuestionTypeMultipleChoice
+    - QuestionTypeTrueFalse
+  models.Quiz:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      max_attempts:
+        type: integer
+      module_id:
+        type: string
+      pass_threshold:
+        type: integer
+      time_limit:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.QuizAttempt:
+    properties:
+      attempt_number:
+        type: integer
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      passed:
+        type: boolean
+      quiz_id:
+        type: string
+      score:
+        type: integer
+      started_at:
+        type: string
+      student_id:
+        type: string
+      time_spent:
+        type: integer
+    type: object
+  models.QuizReport:
+    properties:
+      most_failed_questions:
+        items:
+          $ref: '#/definitions/models.MostFailedQuestionRow'
+        type: array
+      rows:
+        items:
+          $ref: '#/definitions/models.QuizReportRow'
+        type: array
+    type: object
+  models.QuizReportRow:
+    properties:
+      attempts:
+        type: integer
+      avg_attempts_per_user:
+        type: number
+      avg_score:
+        type: number
+      fail_rate:
+        type: number
+      pass_rate:
+        type: number
+      quiz_id:
+        type: string
+      quiz_title:
+        type: string
+    type: object
+  models.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        maxLength: 254
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - username
+    type: object
+  models.ResetPasswordRequest:
+    properties:
+      new_password:
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  models.RevenueReportRow:
+    properties:
+      avg_enrollment_value:
+        type: number
+      course_id:
+        type: string
+      course_title:
+        type: string
+      free_enrollments:
+        type: integer
+      paid_enrollments:
+        type: integer
+      revenue:
+        type: number
+    type: object
+  models.RevenueSummary:
+    properties:
+      points:
+        items:
+          $ref: '#/definitions/models.FinancePoint'
+        type: array
+      total:
+        type: number
+    type: object
+  models.Review:
+    properties:
+      comment:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      rating:
+        type: integer
+      student_id:
+        type: string
+      student_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ReviewList:
+    properties:
+      avg_rating:
+        type: number
+      items:
+        items:
+          $ref: '#/definitions/models.Review'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  models.ReviewReportRow:
+    properties:
+      avg_rating:
+        type: number
+      completed_count:
+        type: integer
+      course_id:
+        type: string
+      course_title:
+        type: string
+      low_rating:
+        type: boolean
+      review_count:
+        type: integer
+      review_gap:
+        type: integer
+    type: object
+  models.StudentProgress:
+    properties:
+      completed_lesson_ids:
+        items:
+          type: string
+        type: array
+      completed_lessons:
+        type: integer
+      course_id:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      last_activity_at:
+        type: string
+      progress_percent:
+        type: number
+      student_id:
+        type: string
+      total_lessons:
+        type: integer
+    type: object
+  models.StudentReport:
+    properties:
+      growth:
+        items:
+          $ref: '#/definitions/models.TrendRow'
+        type: array
+      rows:
+        items:
+          $ref: '#/definitions/models.StudentReportRow'
+        type: array
+    type: object
+  models.StudentReportRow:
+    properties:
+      active:
+        type: boolean
+      completed_courses:
+        type: integer
+      email:
+        type: string
+      enrolled_courses:
+        type: integer
+      full_name:
+        type: string
+      last_activity_at:
+        type: string
+      registered_at:
+        type: string
+      student_id:
+        type: string
+    type: object
+  models.SubmitAnswer:
+    properties:
+      option_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      question_id:
+        type: string
+    required:
+    - option_ids
+    - question_id
+    type: object
+  models.SubmitAttempt:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/models.SubmitAnswer'
+        type: array
+    type: object
+  models.TokenPair:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.TrendRow:
+    properties:
+      count:
+        type: integer
+      period:
+        type: string
+    type: object
+  models.UpdateCategory:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+    type: object
+  models.UpdateCourseRequest:
+    properties:
+      category_id:
+        type: string
+      cover:
+        type: string
+      description:
+        type: string
+      difficulty:
+        allOf:
+        - $ref: '#/definitions/models.Difficulty'
+        enum:
+        - beginner
+        - intermediate
+        - advanced
+      language:
+        type: string
+      learning_outcomes:
+        items:
+          type: string
+        type: array
+      payout_type:
+        allOf:
+        - $ref: '#/definitions/models.PayoutType'
+        enum:
+        - percentage
+        - fixed
+      payout_value:
+        minimum: 0
+        type: number
+      price:
+        minimum: 0
+        type: number
+      requirements:
+        items:
+          type: string
+        type: array
+      title:
+        minLength: 1
+        type: string
+      total_duration:
+        minimum: 0
+        type: integer
+    type: object
+  models.UpdateCourseStatus:
+    properties:
+      id:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/models.CourseStatus'
+        enum:
+        - draft
+        - published
+    required:
+    - status
+    type: object
+  models.UpdateEnrollmentStatus:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/models.EnrollmentStatus'
+        enum:
+        - active
+        - completed
+        - dropped
+    required:
+    - status
+    type: object
+  models.UpdateLesson:
+    properties:
+      duration:
+        type: integer
+      is_preview:
+        type: boolean
+      title:
+        type: string
+    type: object
+  models.UpdateLessonMaterial:
+    properties:
+      content:
+        type: string
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      mime_type:
+        type: string
+      object_key:
+        type: string
+    type: object
+  models.UpdateLessonOrder:
+    properties:
+      order_number:
+        minimum: 1
+        type: integer
+    required:
+    - order_number
+    type: object
+  models.UpdateMeRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      email:
+        maxLength: 254
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UpdateModule:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+  models.UpdateModuleOrder:
+    properties:
+      order_number:
+        minimum: 1
+        type: integer
+    required:
+    - order_number
+    type: object
+  models.UpdateQuestion:
+    properties:
+      options:
+        items:
+          $ref: '#/definitions/models.CreateQuestionOption'
+        minItems: 2
+        type: array
+      order_number:
+        minimum: 1
+        type: integer
+      text:
+        minLength: 1
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/models.QuestionType'
+        enum:
+        - single_choice
+        - multiple_choice
+        - true_false
+    type: object
+  models.UpdateQuiz:
+    properties:
+      description:
+        type: string
+      max_attempts:
+        type: integer
+      pass_threshold:
+        maximum: 100
+        minimum: 0
+        type: integer
+      time_limit:
+        type: integer
+      title:
+        minLength: 1
+        type: string
+    type: object
+  models.UpdateReview:
+    properties:
+      comment:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      email:
+        maxLength: 254
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      role:
+        enum:
+        - SuperAdmin
+        - Instructor
+        - Student
+        type: string
+      username:
+        type: string
+    type: object
+  models.UpdateUserStatus:
+    properties:
+      id:
+        type: string
+      status:
+        enum:
+        - active
+        - blocked
+        type: string
+    required:
+    - status
+    type: object
+  models.UploadPurpose:
+    enum:
+    - avatar
+    - course_cover
+    - material
+    type: string
+    x-enum-varnames:
+    - UploadPurposeAvatar
+    - UploadPurposeCourseCover
+    - UploadPurposeMaterial
+  models.User:
+    properties:
+      avatar:
+        type: string
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      role_id:
+        type: string
+      role_name:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  response.ErrorBody:
+    properties:
+      code:
+        type: string
+      fields:
+        additionalProperties:
+          type: string
+        type: object
+      message:
+        type: string
+    type: object
+  response.Failure:
+    properties:
+      error:
+        $ref: '#/definitions/response.ErrorBody'
+      success:
+        type: boolean
+    type: object
+  response.MessageData:
+    properties:
+      message:
+        type: string
+    type: object
+  response.Success:
+    properties:
+      data: {}
+      success:
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: |-
+    REST API of the learning management system: courses, lessons, quizzes, certificates, payments and reports.
+    Every answer is {"success": true, "data": ...} or {"success": false, "error": {"code", "message", "fields"}}.
+    Log in with POST /auth/login, then click "Authorize" and enter: Bearer <access_token>.
+  title: Learning Management System API
+  version: "1.0"
+paths:
+  /attempts/{attemptId}:
+    get:
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Attempt id
+        format: uuid
+        in: path
+        name: attemptId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AttemptDetail'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get an attempt
+      tags:
+      - Attempts
+  /attempts/{attemptId}/submit:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Student.'
+      parameters:
+      - description: Attempt id
+        format: uuid
+        in: path
+        name: attemptId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SubmitAttempt'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AttemptResult'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Submit the answers and get the score
+      tags:
+      - Attempts
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: anyone.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Send a password reset link by email
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: anyone.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Log in
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: anyone.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Log out (delete the refresh token)
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: anyone.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TokenPair'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Get a new token pair with a refresh token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: anyone.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TokenPair'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Register a new student
+      tags:
+      - Auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: anyone.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Set a new password with the reset token
+      tags:
+      - Auth
+  /categories:
+    get:
+      description: 'Access: anyone.'
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CategoryList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: List categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create a category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a category
+      tags:
+      - Categories
+    get:
+      description: 'Access: anyone.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Get a category
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCategory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a category
+      tags:
+      - Categories
+  /certificates/{certificateId}:
+    get:
+      description: 'Access: owner or SuperAdmin.'
+      parameters:
+      - description: Certificate id
+        format: uuid
+        in: path
+        name: certificateId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CertificateDetail'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get a certificate
+      tags:
+      - Certificates
+  /certificates/{certificateId}/download:
+    get:
+      description: 'Access: owner or SuperAdmin.'
+      parameters:
+      - description: Certificate id
+        format: uuid
+        in: path
+        name: certificateId
+        required: true
+        type: string
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: The PDF
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Download the certificate as a PDF
+      tags:
+      - Certificates
+  /certificates/me:
+    get:
+      description: 'Access: Student.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.CertificateDetail'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List my certificates
+      tags:
+      - Certificates
+  /certificates/verify/{uniqueId}:
+    get:
+      description: 'Access: anyone.'
+      parameters:
+      - description: Certificate number
+        in: path
+        name: uniqueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CertificateVerification'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Verify a certificate by its number (LMS-XXXX-XXXX-XXXX)
+      tags:
+      - Certificates
+  /courses:
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking (visitors
+        see published courses only).'
+      parameters:
+      - in: query
+        name: category_id
+        type: string
+      - enum:
+        - beginner
+        - intermediate
+        - advanced
+        in: query
+        name: difficulty
+        type: string
+        x-enum-varnames:
+        - DifficultyBeginner
+        - DifficultyIntermediate
+        - DifficultyAdvanced
+      - in: query
+        name: instructor_id
+        type: string
+      - in: query
+        name: language
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        maximum: 5
+        minimum: 0
+        name: min_rating
+        type: number
+      - in: query
+        name: page
+        type: integer
+      - enum:
+        - free
+        - paid
+        in: query
+        name: price_type
+        type: string
+      - in: query
+        name: q
+        type: string
+      - enum:
+        - popular
+        - rating
+        - newest
+        - price
+        in: query
+        name: sort
+        type: string
+      - enum:
+        - draft
+        - published
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - CourseStatusDraft
+        - CourseStatusPublished
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CourseListItemList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Search the catalog
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CourseDetail'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create a course
+      tags:
+      - Courses
+  /courses/{courseId}:
+    delete:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a course
+      tags:
+      - Courses
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking (a draft
+        is for its owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CourseDetail'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Get a course with its outcomes, requirements and rating
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CourseDetail'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a course (outcomes and requirements are replaced)
+      tags:
+      - Courses
+  /courses/{courseId}/enrollments:
+    get:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - enum:
+        - active
+        - completed
+        - dropped
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - EnrollmentStatusActive
+        - EnrollmentStatusCompleted
+        - EnrollmentStatusDropped
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.EnrollmentRosterItemList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List the enrollments of a course
+      tags:
+      - Enrollments
+    post:
+      description: 'Access: Student.'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Enrollment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Enroll in a course (a paid course also creates the payment)
+      tags:
+      - Enrollments
+  /courses/{courseId}/modules:
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking.'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ModuleDetail'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: List the modules of a course
+      tags:
+      - Modules
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Module'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create a module
+      tags:
+      - Modules
+  /courses/{courseId}/progress:
+    get:
+      description: 'Access: Student.'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CourseProgress'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: My progress in a course
+      tags:
+      - Progress
+  /courses/{courseId}/quizzes:
+    get:
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Quiz'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List the quizzes of a course
+      tags:
+      - Quizzes
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQuiz'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Quiz'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create the final quiz of a course
+      tags:
+      - Quizzes
+  /courses/{courseId}/reviews:
+    get:
+      description: 'Access: anyone.'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ReviewList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: List the reviews of a course
+      tags:
+      - Reviews
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Student.'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateReview'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Review'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Review a course (needs an enrollment; one review per student)
+      tags:
+      - Reviews
+  /courses/{courseId}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCourseStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Publish a course or make it a draft
+      tags:
+      - Courses
+  /courses/{courseId}/students:
+    get:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - enum:
+        - active
+        - completed
+        - dropped
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - EnrollmentStatusActive
+        - EnrollmentStatusCompleted
+        - EnrollmentStatusDropped
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.StudentProgressList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List the students of a course with their progress
+      tags:
+      - Progress
+  /courses/{courseId}/students/{studentId}/progress:
+    get:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Course id
+        format: uuid
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: Student id
+        format: uuid
+        in: path
+        name: studentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CourseProgress'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Progress of one student in a course
+      tags:
+      - Progress
+  /enrollments/{enrollmentId}:
+    get:
+      description: 'Access: owner student, course instructor or SuperAdmin.'
+      parameters:
+      - description: Enrollment id
+        format: uuid
+        in: path
+        name: enrollmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Enrollment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get an enrollment
+      tags:
+      - Enrollments
+  /enrollments/{enrollmentId}/payment:
+    get:
+      description: 'Access: owner student, course instructor or SuperAdmin.'
+      parameters:
+      - description: Enrollment id
+        format: uuid
+        in: path
+        name: enrollmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get the payment of an enrollment
+      tags:
+      - Payments
+  /enrollments/{enrollmentId}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 'Access: owner student, course instructor or SuperAdmin.'
+      parameters:
+      - description: Enrollment id
+        format: uuid
+        in: path
+        name: enrollmentId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateEnrollmentStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Change the status of an enrollment
+      tags:
+      - Enrollments
+  /enrollments/me:
+    get:
+      description: 'Access: Student.'
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - enum:
+        - active
+        - completed
+        - dropped
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - EnrollmentStatusActive
+        - EnrollmentStatusCompleted
+        - EnrollmentStatusDropped
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.MyEnrollmentList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List my enrollments
+      tags:
+      - Enrollments
+  /finance:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FinanceSummary'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Revenue, instructor payouts and the net
+      tags:
+      - Finance
+  /finance/expenses:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ExpenseSummary'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Payouts to instructors by period and by course
+      tags:
+      - Finance
+  /finance/revenue:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RevenueSummary'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Revenue by period and by course
+      tags:
+      - Finance
+  /lessons/{lessonId}:
+    delete:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a lesson
+      tags:
+      - Lessons
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking.'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Lesson'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Get a lesson
+      tags:
+      - Lessons
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateLesson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Lesson'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a lesson
+      tags:
+      - Lessons
+  /lessons/{lessonId}/materials:
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking.'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.LessonMaterial'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: List the materials of a lesson (a lesson that is not a preview needs
+        an enrolled student, the owner or SuperAdmin)
+      tags:
+      - Lessons
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateLessonMaterial'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LessonMaterial'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Add a material to a lesson
+      tags:
+      - Lessons
+  /lessons/{lessonId}/order:
+    patch:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateLessonOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Move a lesson
+      tags:
+      - Lessons
+  /lessons/{lessonId}/progress:
+    get:
+      description: 'Access: Student.'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LessonProgress'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: My progress in a lesson
+      tags:
+      - Progress
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Student.'
+      parameters:
+      - description: Lesson id
+        format: uuid
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.lessonProgressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LessonProgress'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Mark a lesson done or not done (finishing the course issues the certificate)
+      tags:
+      - Progress
+  /materials/{materialId}:
+    delete:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Material id
+        format: uuid
+        in: path
+        name: materialId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a material
+      tags:
+      - Lessons
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking.'
+      parameters:
+      - description: Material id
+        format: uuid
+        in: path
+        name: materialId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LessonMaterial'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Get a material (same rule as the list)
+      tags:
+      - Lessons
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Material id
+        format: uuid
+        in: path
+        name: materialId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateLessonMaterial'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LessonMaterial'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a material
+      tags:
+      - Lessons
+  /modules/{moduleId}:
+    delete:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a module
+      tags:
+      - Modules
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking.'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ModuleDetail'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: Get a module
+      tags:
+      - Modules
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateModule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Module'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a module
+      tags:
+      - Modules
+  /modules/{moduleId}/lessons:
+    get:
+      description: 'Access: anyone; a token, if sent, tells who is asking.'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Lesson'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      summary: List the lessons of a module
+      tags:
+      - Lessons
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Lesson'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create a lesson
+      tags:
+      - Lessons
+  /modules/{moduleId}/order:
+    patch:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateModuleOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Move a module
+      tags:
+      - Modules
+  /modules/{moduleId}/quizzes:
+    get:
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Quiz'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List the quizzes of a module
+      tags:
+      - Quizzes
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Module id
+        format: uuid
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQuiz'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Quiz'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create a quiz of a module
+      tags:
+      - Quizzes
+  /payments:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - in: query
+        name: from
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PaymentList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List payments
+      tags:
+      - Payments
+  /payments/{paymentId}:
+    get:
+      description: 'Access: owner student, course instructor or SuperAdmin.'
+      parameters:
+      - description: Payment id
+        format: uuid
+        in: path
+        name: paymentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get a payment
+      tags:
+      - Payments
+  /questions/{questionId}:
+    delete:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Question id
+        format: uuid
+        in: path
+        name: questionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a question
+      tags:
+      - Questions
+    get:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Question id
+        format: uuid
+        in: path
+        name: questionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Question'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get a question
+      tags:
+      - Questions
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Question id
+        format: uuid
+        in: path
+        name: questionId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateQuestion'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Question'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a question
+      tags:
+      - Questions
+  /quizzes/{quizId}:
+    delete:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a quiz
+      tags:
+      - Quizzes
+    get:
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Quiz'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get a quiz
+      tags:
+      - Quizzes
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateQuiz'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Quiz'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a quiz
+      tags:
+      - Quizzes
+  /quizzes/{quizId}/attempts:
+    get:
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.QuizAttempt'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List attempts (own for a student, all for the owner and SuperAdmin)
+      tags:
+      - Attempts
+    post:
+      description: 'Access: Student.'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AttemptView'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Start an attempt (questions and options come shuffled, without the
+        right answers)
+      tags:
+      - Attempts
+  /quizzes/{quizId}/questions:
+    get:
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Question'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List the questions of a quiz with the right answers
+      tags:
+      - Questions
+    post:
+      consumes:
+      - application/json
+      description: 'Access: Instructor (owner).'
+      parameters:
+      - description: Quiz id
+        format: uuid
+        in: path
+        name: quizId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Question'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Add a question with its options
+      tags:
+      - Questions
+  /reports/certificates:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CertificateReport'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Certificates report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/enrollments:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.EnrollmentReport'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Enrollments report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/instructors:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.InstructorReportRow'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Instructors report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/progress:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProgressReport'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Progress report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/quizzes:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.QuizReport'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Quizzes report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/revenue:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.RevenueReportRow'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Revenue report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/reviews:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ReviewReportRow'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Reviews report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reports/students:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: course_id
+        type: string
+      - enum:
+        - json
+        - csv
+        in: query
+        name: format
+        type: string
+      - in: query
+        name: from
+        type: string
+      - enum:
+        - day
+        - week
+        - month
+        in: query
+        name: group_by
+        type: string
+      - in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.StudentReport'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Students report (format=csv downloads the main table as a CSV file)
+      tags:
+      - Reports
+  /reviews/{reviewId}:
+    delete:
+      description: 'Access: owner or SuperAdmin.'
+      parameters:
+      - description: Review id
+        format: uuid
+        in: path
+        name: reviewId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a review
+      tags:
+      - Reviews
+    put:
+      consumes:
+      - application/json
+      description: 'Access: Student (owner).'
+      parameters:
+      - description: Review id
+        format: uuid
+        in: path
+        name: reviewId
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateReview'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Review'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update my review
+      tags:
+      - Reviews
+  /uploads/presign:
+    post:
+      consumes:
+      - application/json
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.PresignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PresignResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get a presigned URL to upload a file
+      tags:
+      - Uploads
+  /users:
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - enum:
+        - SuperAdmin
+        - Instructor
+        - Student
+        in: query
+        name: role
+        type: string
+      - in: query
+        name: search
+        type: string
+      - enum:
+        - active
+        - blocked
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.UserList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: List users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Create a user with any role
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+      tags:
+      - Users
+    get:
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get a user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update a user (a role change ends the sessions of the user)
+      tags:
+      - Users
+  /users/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 'Access: SuperAdmin.'
+      parameters:
+      - description: Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Block or unblock a user (blocking ends the sessions at once)
+      tags:
+      - Users
+  /users/me:
+    get:
+      description: 'Access: any logged in user.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Get my profile
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Update my profile
+      tags:
+      - Users
+  /users/me/password:
+    put:
+      consumes:
+      - application/json
+      description: 'Access: any logged in user.'
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Success'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MessageData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Failure'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Failure'
+      security:
+      - BearerAuth: []
+      summary: Change my password (ends the other sessions)
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: '"Bearer " and the access token'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,3650 @@
+{
+  "info": {
+    "_postman_id": "00e69889-0e22-5fe1-9101-0646ddbbcbc3",
+    "name": "Learning Management System API",
+    "description": "REST API of the learning management system: courses, lessons, quizzes, certificates, payments and reports.\nEvery answer is {\"success\": true, \"data\": ...} or {\"success\": false, \"error\": {\"code\", \"message\", \"fields\"}}.\nLog in with POST /auth/login, then click \"Authorize\" and enter: Bearer <access_token>.\n\nGenerated from docs/swagger/swagger.json by scripts/postman.py.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register a new student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new student\n\nAccess: anyone.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"first_name\": \"Ali\",\n  \"last_name\": \"Valiyev\",\n  \"password\": \"Passw0rd!2024\",\n  \"username\": \"student1\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the tokens for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success) {",
+                  "  pm.environment.set('access_token', body.data.access_token);",
+                  "  pm.environment.set('refresh_token', body.data.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Log in\n\nAccess: anyone.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"password\": \"Passw0rd!2024\",\n  \"username\": \"student1\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the tokens for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success) {",
+                  "  if (body.data.user) { pm.environment.set('userId', body.data.user.id); }",
+                  "  pm.environment.set('access_token', body.data.access_token);",
+                  "  pm.environment.set('refresh_token', body.data.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get a new token pair with a refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Get a new token pair with a refresh token\n\nAccess: anyone.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the tokens for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success) {",
+                  "  pm.environment.set('access_token', body.data.access_token);",
+                  "  pm.environment.set('refresh_token', body.data.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log out (delete the refresh token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Log out (delete the refresh token)\n\nAccess: anyone.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) { pm.environment.unset('refresh_token'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send a password reset link by email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Send a password reset link by email\n\nAccess: anyone.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"email\": \"student@example.com\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Set a new password with the reset token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Set a new password with the reset token\n\nAccess: anyone.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"new_password\": \"N3w-Passw0rd!2024\",\n  \"token\": \"{{reset_token}}\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create a user with any role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Create a user with any role\n\nAccess: SuperAdmin.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"avatar\": \"string\",\n  \"bio\": \"string\",\n  \"email\": \"student@example.com\",\n  \"first_name\": \"Ali\",\n  \"last_name\": \"Valiyev\",\n  \"password\": \"Passw0rd!2024\",\n  \"role\": \"SuperAdmin\",\n  \"username\": \"student1\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('userId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "role",
+                  "value": "SuperAdmin",
+                  "disabled": true,
+                  "description": "SuperAdmin, Instructor, Student"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true,
+                  "description": "active, blocked"
+                }
+              ]
+            },
+            "description": "List users\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Get my profile\n\nAccess: any logged in user."
+          }
+        },
+        {
+          "name": "Get a user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:userId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get a user\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Update my profile\n\nAccess: any logged in user.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"avatar\": \"string\",\n  \"bio\": \"string\",\n  \"email\": \"student@example.com\",\n  \"first_name\": \"Ali\",\n  \"last_name\": \"Valiyev\",\n  \"username\": \"student1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change my password (ends the other sessions)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "password"
+              ]
+            },
+            "description": "Change my password (ends the other sessions)\n\nAccess: any logged in user.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"new_password\": \"N3w-Passw0rd!2024\",\n  \"old_password\": \"Passw0rd!2024\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update a user (a role change ends the sessions of the user)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:userId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Update a user (a role change ends the sessions of the user)\n\nAccess: SuperAdmin.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"avatar\": \"string\",\n  \"bio\": \"string\",\n  \"email\": \"student@example.com\",\n  \"first_name\": \"Ali\",\n  \"last_name\": \"Valiyev\",\n  \"role\": \"SuperAdmin\",\n  \"username\": \"student1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Block or unblock a user (blocking ends the sessions at once)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:userId/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":userId",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Block or unblock a user (blocking ends the sessions at once)\n\nAccess: SuperAdmin.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"id\": \"string\",\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a user",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:userId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Delete a user\n\nAccess: SuperAdmin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Get a presigned URL to upload a file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/uploads/presign",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "uploads",
+                "presign"
+              ]
+            },
+            "description": "Get a presigned URL to upload a file\n\nAccess: any logged in user.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"content_type\": \"string\",\n  \"file_name\": \"string\",\n  \"purpose\": \"avatar\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create a category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ]
+            },
+            "description": "Create a category\n\nAccess: SuperAdmin.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"name\": \"string\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('categoryId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "List categories\n\nAccess: anyone.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get a category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:categoryId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories",
+                ":categoryId"
+              ],
+              "variable": [
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}"
+                }
+              ]
+            },
+            "description": "Get a category\n\nAccess: anyone.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Update a category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:categoryId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories",
+                ":categoryId"
+              ],
+              "variable": [
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}"
+                }
+              ]
+            },
+            "description": "Update a category\n\nAccess: SuperAdmin.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"id\": \"string\",\n  \"name\": \"string\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:categoryId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories",
+                ":categoryId"
+              ],
+              "variable": [
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}"
+                }
+              ]
+            },
+            "description": "Delete a category\n\nAccess: SuperAdmin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Create a course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses"
+              ]
+            },
+            "description": "Create a course\n\nAccess: Instructor.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"category_id\": \"{{categoryId}}\",\n  \"cover\": \"string\",\n  \"description\": \"string\",\n  \"difficulty\": \"beginner\",\n  \"instructor_id\": \"{{userId}}\",\n  \"language\": \"string\",\n  \"learning_outcomes\": [\n    \"string\"\n  ],\n  \"payout_type\": \"percentage\",\n  \"payout_value\": 0,\n  \"price\": 0,\n  \"requirements\": [\n    \"string\"\n  ],\n  \"title\": \"string\",\n  \"total_duration\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('courseId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search the catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses"
+              ],
+              "query": [
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "difficulty",
+                  "value": "beginner",
+                  "disabled": true,
+                  "description": "beginner, intermediate, advanced"
+                },
+                {
+                  "key": "instructor_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "language",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "min_rating",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "price_type",
+                  "value": "free",
+                  "disabled": true,
+                  "description": "free, paid"
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "sort",
+                  "value": "popular",
+                  "disabled": true,
+                  "description": "popular, rating, newest, price"
+                },
+                {
+                  "key": "status",
+                  "value": "draft",
+                  "disabled": true,
+                  "description": "draft, published"
+                }
+              ]
+            },
+            "description": "Search the catalog\n\nAccess: anyone; a token, if sent, tells who is asking (visitors see published courses only).",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get a course with its outcomes, requirements and rating",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Get a course with its outcomes, requirements and rating\n\nAccess: anyone; a token, if sent, tells who is asking (a draft is for its owner).",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Update a course (outcomes and requirements are replaced)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Update a course (outcomes and requirements are replaced)\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"category_id\": \"{{categoryId}}\",\n  \"cover\": \"string\",\n  \"description\": \"string\",\n  \"difficulty\": \"beginner\",\n  \"language\": \"string\",\n  \"learning_outcomes\": [\n    \"string\"\n  ],\n  \"payout_type\": \"percentage\",\n  \"payout_value\": 0,\n  \"price\": 0,\n  \"requirements\": [\n    \"string\"\n  ],\n  \"title\": \"string\",\n  \"total_duration\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Publish a course or make it a draft",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Publish a course or make it a draft\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"id\": \"string\",\n  \"status\": \"draft\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a course",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Delete a course\n\nAccess: Instructor (owner)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Modules",
+      "item": [
+        {
+          "name": "Create a module",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "modules"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Create a module\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"order_number\": 1,\n  \"title\": \"string\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('moduleId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List the modules of a course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "modules"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "List the modules of a course\n\nAccess: anyone; a token, if sent, tells who is asking.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get a module",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "Get a module\n\nAccess: anyone; a token, if sent, tells who is asking.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Update a module",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "Update a module\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"title\": \"string\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Move a module",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId",
+                "order"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "Move a module\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"order_number\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a module",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "Delete a module\n\nAccess: Instructor (owner)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Add a material to a lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId/materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId",
+                "materials"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "Add a material to a lesson\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"content\": \"string\",\n  \"file_name\": \"string\",\n  \"file_size\": 1,\n  \"mime_type\": \"string\",\n  \"object_key\": \"string\",\n  \"type\": \"text\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('materialId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId/lessons",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId",
+                "lessons"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "Create a lesson\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"duration\": 1,\n  \"is_preview\": true,\n  \"order_number\": 1,\n  \"title\": \"string\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('lessonId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get a lesson",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "Get a lesson\n\nAccess: anyone; a token, if sent, tells who is asking.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "List the materials of a lesson (a lesson that is not a preview needs an enrolled student, the owner or SuperAdmin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId/materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId",
+                "materials"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "List the materials of a lesson (a lesson that is not a preview needs an enrolled student, the owner or SuperAdmin)\n\nAccess: anyone; a token, if sent, tells who is asking.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get a material (same rule as the list)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/materials/:materialId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "materials",
+                ":materialId"
+              ],
+              "variable": [
+                {
+                  "key": "materialId",
+                  "value": "{{materialId}}"
+                }
+              ]
+            },
+            "description": "Get a material (same rule as the list)\n\nAccess: anyone; a token, if sent, tells who is asking.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "List the lessons of a module",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId/lessons",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId",
+                "lessons"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "List the lessons of a module\n\nAccess: anyone; a token, if sent, tells who is asking.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Update a lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "Update a lesson\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"duration\": 1,\n  \"is_preview\": true,\n  \"title\": \"string\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update a material",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/materials/:materialId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "materials",
+                ":materialId"
+              ],
+              "variable": [
+                {
+                  "key": "materialId",
+                  "value": "{{materialId}}"
+                }
+              ]
+            },
+            "description": "Update a material\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"content\": \"string\",\n  \"file_name\": \"string\",\n  \"file_size\": 1,\n  \"mime_type\": \"string\",\n  \"object_key\": \"string\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Move a lesson",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId",
+                "order"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "Move a lesson\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"order_number\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "Delete a lesson\n\nAccess: Instructor (owner)."
+          }
+        },
+        {
+          "name": "Delete a material",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/materials/:materialId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "materials",
+                ":materialId"
+              ],
+              "variable": [
+                {
+                  "key": "materialId",
+                  "value": "{{materialId}}"
+                }
+              ]
+            },
+            "description": "Delete a material\n\nAccess: Instructor (owner)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "Enroll in a course (a paid course also creates the payment)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/enrollments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "enrollments"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Enroll in a course (a paid course also creates the payment)\n\nAccess: Student."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('enrollmentId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List the enrollments of a course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/enrollments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "enrollments"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true,
+                  "description": "active, completed, dropped"
+                }
+              ]
+            },
+            "description": "List the enrollments of a course\n\nAccess: Instructor (owner)."
+          }
+        },
+        {
+          "name": "List my enrollments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true,
+                  "description": "active, completed, dropped"
+                }
+              ]
+            },
+            "description": "List my enrollments\n\nAccess: Student."
+          }
+        },
+        {
+          "name": "Get an enrollment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/:enrollmentId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                ":enrollmentId"
+              ],
+              "variable": [
+                {
+                  "key": "enrollmentId",
+                  "value": "{{enrollmentId}}"
+                }
+              ]
+            },
+            "description": "Get an enrollment\n\nAccess: owner student, course instructor or SuperAdmin."
+          }
+        },
+        {
+          "name": "Change the status of an enrollment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/:enrollmentId/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                ":enrollmentId",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "enrollmentId",
+                  "value": "{{enrollmentId}}"
+                }
+              ]
+            },
+            "description": "Change the status of an enrollment\n\nAccess: owner student, course instructor or SuperAdmin.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"status\": \"active\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Mark a lesson done or not done (finishing the course issues the certificate)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId/progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId",
+                "progress"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "Mark a lesson done or not done (finishing the course issues the certificate)\n\nAccess: Student.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"completed\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "My progress in a course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "progress"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "My progress in a course\n\nAccess: Student."
+          }
+        },
+        {
+          "name": "List the students of a course with their progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "students"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true,
+                  "description": "active, completed, dropped"
+                }
+              ]
+            },
+            "description": "List the students of a course with their progress\n\nAccess: Instructor (owner)."
+          }
+        },
+        {
+          "name": "Progress of one student in a course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/students/:studentId/progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "students",
+                ":studentId",
+                "progress"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                },
+                {
+                  "key": "studentId",
+                  "value": "{{studentId}}"
+                }
+              ]
+            },
+            "description": "Progress of one student in a course\n\nAccess: Instructor (owner)."
+          }
+        },
+        {
+          "name": "My progress in a lesson",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/lessons/:lessonId/progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "lessons",
+                ":lessonId",
+                "progress"
+              ],
+              "variable": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            },
+            "description": "My progress in a lesson\n\nAccess: Student."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quizzes",
+      "item": [
+        {
+          "name": "Create the final quiz of a course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "quizzes"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Create the final quiz of a course\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"max_attempts\": 1,\n  \"pass_threshold\": 1,\n  \"time_limit\": 1,\n  \"title\": \"string\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('quizId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a quiz of a module",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId",
+                "quizzes"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "Create a quiz of a module\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"max_attempts\": 1,\n  \"pass_threshold\": 1,\n  \"time_limit\": 1,\n  \"title\": \"string\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('quizId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List the quizzes of a course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "quizzes"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "List the quizzes of a course\n\nAccess: any logged in user."
+          }
+        },
+        {
+          "name": "List the quizzes of a module",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules/:moduleId/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules",
+                ":moduleId",
+                "quizzes"
+              ],
+              "variable": [
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}"
+                }
+              ]
+            },
+            "description": "List the quizzes of a module\n\nAccess: any logged in user."
+          }
+        },
+        {
+          "name": "Get a quiz",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "Get a quiz\n\nAccess: any logged in user."
+          }
+        },
+        {
+          "name": "Update a quiz",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "Update a quiz\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"description\": \"string\",\n  \"max_attempts\": 1,\n  \"pass_threshold\": 1,\n  \"time_limit\": 1,\n  \"title\": \"string\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a quiz",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "Delete a quiz\n\nAccess: Instructor (owner)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "Add a question with its options",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId/questions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId",
+                "questions"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "Add a question with its options\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"options\": [\n    {\n      \"is_correct\": true,\n      \"option_text\": \"string\"\n    }\n  ],\n  \"order_number\": 1,\n  \"text\": \"string\",\n  \"type\": \"single_choice\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('questionId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get a question",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/questions/:questionId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "questions",
+                ":questionId"
+              ],
+              "variable": [
+                {
+                  "key": "questionId",
+                  "value": "{{questionId}}"
+                }
+              ]
+            },
+            "description": "Get a question\n\nAccess: Instructor (owner)."
+          }
+        },
+        {
+          "name": "List the questions of a quiz with the right answers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId/questions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId",
+                "questions"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "List the questions of a quiz with the right answers\n\nAccess: Instructor (owner)."
+          }
+        },
+        {
+          "name": "Update a question",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/questions/:questionId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "questions",
+                ":questionId"
+              ],
+              "variable": [
+                {
+                  "key": "questionId",
+                  "value": "{{questionId}}"
+                }
+              ]
+            },
+            "description": "Update a question\n\nAccess: Instructor (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"options\": [\n    {\n      \"is_correct\": true,\n      \"option_text\": \"string\"\n    }\n  ],\n  \"order_number\": 1,\n  \"text\": \"string\",\n  \"type\": \"single_choice\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a question",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/questions/:questionId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "questions",
+                ":questionId"
+              ],
+              "variable": [
+                {
+                  "key": "questionId",
+                  "value": "{{questionId}}"
+                }
+              ]
+            },
+            "description": "Delete a question\n\nAccess: Instructor (owner)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attempts",
+      "item": [
+        {
+          "name": "Submit the answers and get the score",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/attempts/:attemptId/submit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attempts",
+                ":attemptId",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "attemptId",
+                  "value": "{{attemptId}}"
+                }
+              ]
+            },
+            "description": "Submit the answers and get the score\n\nAccess: Student.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"answers\": [\n    {\n      \"option_ids\": [\n        \"string\"\n      ],\n      \"question_id\": \"string\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Start an attempt (questions and options come shuffled, without the right answers)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId/attempts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId",
+                "attempts"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "Start an attempt (questions and options come shuffled, without the right answers)\n\nAccess: Student."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('attemptId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get an attempt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/attempts/:attemptId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attempts",
+                ":attemptId"
+              ],
+              "variable": [
+                {
+                  "key": "attemptId",
+                  "value": "{{attemptId}}"
+                }
+              ]
+            },
+            "description": "Get an attempt\n\nAccess: any logged in user."
+          }
+        },
+        {
+          "name": "List attempts (own for a student, all for the owner and SuperAdmin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quizzes/:quizId/attempts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quizzes",
+                ":quizId",
+                "attempts"
+              ],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}"
+                }
+              ]
+            },
+            "description": "List attempts (own for a student, all for the owner and SuperAdmin)\n\nAccess: any logged in user."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Certificates",
+      "item": [
+        {
+          "name": "List my certificates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/certificates/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificates",
+                "me"
+              ]
+            },
+            "description": "List my certificates\n\nAccess: Student."
+          }
+        },
+        {
+          "name": "Verify a certificate by its number (LMS-XXXX-XXXX-XXXX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/certificates/verify/:uniqueId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificates",
+                "verify",
+                ":uniqueId"
+              ],
+              "variable": [
+                {
+                  "key": "uniqueId",
+                  "value": "{{uniqueId}}"
+                }
+              ]
+            },
+            "description": "Verify a certificate by its number (LMS-XXXX-XXXX-XXXX)\n\nAccess: anyone.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get a certificate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/certificates/:certificateId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificates",
+                ":certificateId"
+              ],
+              "variable": [
+                {
+                  "key": "certificateId",
+                  "value": "{{certificateId}}"
+                }
+              ]
+            },
+            "description": "Get a certificate\n\nAccess: owner or SuperAdmin."
+          }
+        },
+        {
+          "name": "Download the certificate as a PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/certificates/:certificateId/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificates",
+                ":certificateId",
+                "download"
+              ],
+              "variable": [
+                {
+                  "key": "certificateId",
+                  "value": "{{certificateId}}"
+                }
+              ]
+            },
+            "description": "Download the certificate as a PDF\n\nAccess: owner or SuperAdmin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Review a course (needs an enrollment; one review per student)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "reviews"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "Review a course (needs an enrollment; one review per student)\n\nAccess: Student.",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"comment\": \"string\",\n  \"rating\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// keep the id of the new resource for the next requests",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.id) { pm.environment.set('reviewId', body.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List the reviews of a course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:courseId/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                ":courseId",
+                "reviews"
+              ],
+              "variable": [
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "List the reviews of a course\n\nAccess: anyone.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Update my review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reviews/:reviewId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                ":reviewId"
+              ],
+              "variable": [
+                {
+                  "key": "reviewId",
+                  "value": "{{reviewId}}"
+                }
+              ]
+            },
+            "description": "Update my review\n\nAccess: Student (owner).",
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"comment\": \"string\",\n  \"rating\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reviews/:reviewId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                ":reviewId"
+              ],
+              "variable": [
+                {
+                  "key": "reviewId",
+                  "value": "{{reviewId}}"
+                }
+              ]
+            },
+            "description": "Delete a review\n\nAccess: owner or SuperAdmin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get the payment of an enrollment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/:enrollmentId/payment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                ":enrollmentId",
+                "payment"
+              ],
+              "variable": [
+                {
+                  "key": "enrollmentId",
+                  "value": "{{enrollmentId}}"
+                }
+              ]
+            },
+            "description": "Get the payment of an enrollment\n\nAccess: owner student, course instructor or SuperAdmin."
+          }
+        },
+        {
+          "name": "List payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "List payments\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Get a payment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payments/:paymentId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                ":paymentId"
+              ],
+              "variable": [
+                {
+                  "key": "paymentId",
+                  "value": "{{paymentId}}"
+                }
+              ]
+            },
+            "description": "Get a payment\n\nAccess: owner student, course instructor or SuperAdmin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Finance",
+      "item": [
+        {
+          "name": "Revenue, instructor payouts and the net",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/finance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "finance"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Revenue, instructor payouts and the net\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Payouts to instructors by period and by course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/finance/expenses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "finance",
+                "expenses"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Payouts to instructors by period and by course\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Revenue by period and by course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/finance/revenue",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "finance",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Revenue by period and by course\n\nAccess: SuperAdmin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Certificates report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/certificates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "certificates"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Certificates report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Enrollments report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/enrollments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "enrollments"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Enrollments report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Instructors report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/instructors",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "instructors"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Instructors report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Progress report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "progress"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Progress report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Quizzes report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "quizzes"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Quizzes report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Revenue report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/revenue",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Revenue report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Reviews report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Reviews report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        },
+        {
+          "name": "Students report (format=csv downloads the main table as a CSV file)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "json, csv"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                },
+                {
+                  "key": "group_by",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "day, week, month"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Students report (format=csv downloads the main table as a CSV file)\n\nAccess: SuperAdmin."
+          }
+        }
+      ]
+    }
+  ]
+}
