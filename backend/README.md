@@ -18,10 +18,11 @@ You need Docker with the Compose plugin.
 make up            # or: docker compose up --build -d
 ```
 
-This starts the API, PostgreSQL, Redis, MinIO and Mailpit, applies the migrations and creates the first SuperAdmin.
+This starts the frontend, the API, PostgreSQL, Redis, MinIO and Mailpit, applies the migrations and creates the first SuperAdmin.
 
 | What | Address |
 |---|---|
+| Frontend | http://localhost:3000 |
 | API | http://localhost:8080 |
 | Swagger UI (try the API in the browser) | http://localhost:8080/swagger/index.html |
 | Mailpit (the emails the API sends, e.g. password reset) | http://localhost:8025 |

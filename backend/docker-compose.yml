@@ -1,5 +1,8 @@
+name: lms
+
 # Local environment: docker compose up --build
 #
+# frontend   http://localhost:3000
 # app        http://localhost:8080
 # mailpit    http://localhost:8025   (all mails the app sends: password reset)
 # minio      http://localhost:9001   (console, login: minioadmin / minioadmin)
@@ -123,6 +126,13 @@ services:
 
       # the container user cannot write next to the binary; logs go to stdout
       LOG_TO_FILE: "false"
+
+  frontend:
+    build: ../frontend
+    depends_on:
+      - app
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
 
 volumes:
   postgres-data:
