@@ -31,5 +31,5 @@ export function GuestOnly() {
 
   if (loading) return <Waiting />
 
-  return user ? <Navigate to="/" replace /> : <Outlet />
+  return user ? <Navigate to="/dashboard" replace /> : <Outlet />
 }

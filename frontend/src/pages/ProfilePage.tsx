@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { api, call } from '@/api/client'
 import { useAuth } from '@/auth/context'
 import { FormField } from '@/components/FormField'
+import { ImageUpload } from '@/components/ImageUpload'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,6 +24,31 @@ const profileSchema = z.object({
 })
 
 type ProfileValues = z.infer<typeof profileSchema>
+
+function AvatarCard() {
+  const { user, setUser } = useAuth()
+
+  const save = useMutation({
+    mutationFn: (avatar: string) => call(api.PUT('/users/me', { body: { avatar } })),
+    onSuccess: (updated) => {
+      setUser(updated)
+      toast.success('Photo saved')
+    },
+    onError: (error) => toast.error(errorMessage(error)),
+  })
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Photo</CardTitle>
+        <CardDescription>It is shown in the menu and, for instructors, on the course page.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ImageUpload purpose="avatar" label="Your photo" previewUrl={user?.avatar_url} onUploaded={(key) => save.mutate(key)} />
+      </CardContent>
+    </Card>
+  )
+}
 
 function ProfileForm() {
   const { user, setUser } = useAuth()
@@ -146,6 +172,7 @@ function PasswordForm() {
 export default function ProfilePage() {
   return (
     <div className="space-y-6">
+      <AvatarCard />
       <ProfileForm />
       <PasswordForm />
     </div>

@@ -33,6 +33,7 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
+          { path: 'dashboard', lazy: page(() => import('@/pages/DashboardPage')) },
           { path: 'profile', lazy: page(() => import('@/pages/ProfilePage')) },
           { path: 'quizzes/:quizId', lazy: page(() => import('@/pages/QuizPage')) },
         ],

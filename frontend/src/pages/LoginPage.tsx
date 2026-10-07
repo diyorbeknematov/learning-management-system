@@ -35,7 +35,7 @@ export default function LoginPage() {
 
     try {
       await login(values.username.trim(), values.password)
-      navigate((location.state as { from?: string } | null)?.from ?? '/', { replace: true })
+      navigate((location.state as { from?: string } | null)?.from ?? '/dashboard', { replace: true })
     } catch (error) {
       // a wrong password, a blocked account or "try again in N seconds"
       setFailure(errorMessage(error))

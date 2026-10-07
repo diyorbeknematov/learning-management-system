@@ -37,7 +37,7 @@ export default function RegisterPage() {
 
     try {
       await signUp(values)
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       if (!applyApiErrors(error, setError)) setFailure(errorMessage(error))
     }

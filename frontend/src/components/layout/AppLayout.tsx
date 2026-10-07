@@ -66,6 +66,11 @@ export function AppLayout() {
           </Link>
 
           <nav className="flex flex-1 items-center gap-4 text-sm">
+            {user && (
+              <NavLink to="/dashboard" className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
+                Dashboard
+              </NavLink>
+            )}
             <NavLink to="/" end className={({ isActive }) => cn('hover:underline', isActive && 'font-medium')}>
               Courses
             </NavLink>
