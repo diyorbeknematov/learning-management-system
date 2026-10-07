@@ -44,22 +44,32 @@ func TestCache_Category_ListIsRefreshedWhenOneIsCreated(t *testing.T) {
 	e := testutil.Setup(t)
 
 	ctx := context.Background()
-	filter := models.CategoryFilter{Limit: 100}
+
+	// the list is filtered by a name of its own: other tests share the database
+	// and create categories at the same time, so the total of all of them moves
+	name := "cat-list-" + testutil.Uniq()
+	filter := models.CategoryFilter{Name: &name, Limit: 100}
 
 	before, err := e.Svc.Category.GetList(ctx, filter)
 	require.NoError(t, err)
+	require.Zero(t, before.Total)
 
-	category := e.NewCategory(t)
+	category, err := e.Svc.Category.Create(ctx, models.CreateCategory{Name: name})
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		e.Exec(t, `DELETE FROM categories WHERE id = $1`, category.ID)
+	})
 
 	after, err := e.Svc.Category.GetList(ctx, filter)
 	require.NoError(t, err)
-	require.Equal(t, before.Total+1, after.Total)
+	require.Equal(t, 1, after.Total)
 
 	require.NoError(t, e.Svc.Category.Delete(ctx, category.ID))
 
 	gone, err := e.Svc.Category.GetList(ctx, filter)
 	require.NoError(t, err)
-	require.Equal(t, before.Total, gone.Total)
+	require.Zero(t, gone.Total)
 }
 
 func TestCache_Course_PublicPageIsCachedAndRefreshedByTheOwner(t *testing.T) {
