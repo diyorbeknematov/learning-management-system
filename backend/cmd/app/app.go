@@ -57,7 +57,7 @@ func Run(cfg *config.Config, log *slog.Logger) error {
 	}
 	defer cache.Close()
 
-	files, err := minio.New(cfg.MinIO)
+	files, err := connectMinIO(cfg.MinIO, log)
 	if err != nil {
 		return fmt.Errorf("connect to minio: %w", err)
 	}
@@ -118,6 +118,31 @@ func Run(cfg *config.Config, log *slog.Logger) error {
 	}
 
 	return serve(server, log)
+}
+
+// connectMinIO connects to MinIO and waits for it for a while: when the whole
+// system starts at once (docker compose) MinIO may not be ready yet.
+func connectMinIO(cfg config.MinIOConfig, log *slog.Logger) (*minio.MinIO, error) {
+	const (
+		attempts = 30
+		pause    = time.Second
+	)
+
+	var lastErr error
+
+	for attempt := 1; attempt <= attempts; attempt++ {
+		files, err := minio.New(cfg)
+		if err == nil {
+			return files, nil
+		}
+
+		lastErr = err
+
+		log.Warn("minio is not ready, trying again", "attempt", attempt, "error", err)
+		time.Sleep(pause)
+	}
+
+	return nil, lastErr
 }
 
 // ensureSuperAdmin creates the first SuperAdmin from ADMIN_* when the system

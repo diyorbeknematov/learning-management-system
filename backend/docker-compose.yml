@@ -53,7 +53,10 @@ services:
       retries: 10
 
   minio:
-    image: minio/minio:latest
+    # The minio/minio images on Docker Hub and Quay are no longer published;
+    # Chainguard builds MinIO from the source. The image has no shell, so there
+    # is no health check: the app waits for MinIO itself when it starts.
+    image: cgr.dev/chainguard/minio:latest
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
@@ -63,11 +66,6 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio-data:/data
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
 
   # Catches the mails of the app instead of sending them.
   mailpit:
@@ -84,7 +82,7 @@ services:
       redis:
         condition: service_healthy
       minio:
-        condition: service_healthy
+        condition: service_started
       mailpit:
         condition: service_started
     ports:
