@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.vscode
+.idea
+docs/*.md
+*.md
+Dockerfile
+docker-compose.yml
+Makefile
+**/*_test.go
