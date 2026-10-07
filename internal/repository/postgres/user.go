@@ -2,13 +2,16 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/diyorbeknematov/lms/internal/models"
 	"github.com/diyorbeknematov/lms/pkg/apperror"
+	"github.com/diyorbeknematov/lms/pkg/helpers"
+	"github.com/diyorbeknematov/lms/pkg/pgerr"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type userRepo struct {
@@ -21,6 +24,63 @@ func NewUserRepository(db DBTX) *userRepo {
 	}
 }
 
+func (r *userRepo) ExistsByEmail(ctx context.Context, email string) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM users 
+			WHERE email = $1 
+				AND deleted_at IS NULL
+		);
+	`
+	var exists bool
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		email,
+	).Scan(&exists)
+
+	if err != nil {
+		return false, apperror.Internal(
+			"repository",
+			"ExistsByEmail",
+			"failed to check weather email exists",
+			err,
+		)
+	}
+
+	return exists, nil
+}
+
+func (r *userRepo) ExistsByUsername(ctx context.Context, username string) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM users
+			WHERE username = $1
+				AND deleted_at IS NULL
+		);
+	`
+
+	var exists bool
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		username,
+	).Scan(&exists)
+
+	if err != nil {
+		return false, apperror.Internal(
+			"repository",
+			"ExistsByUsername",
+			"failed to check weather username exists",
+			err,
+		)
+	}
+
+	return exists, err
+}
+
 func (r *userRepo) Create(ctx context.Context, user models.CreateUser) (uuid.UUID, error) {
 	query := `
 		INSERT INTO users (
@@ -31,35 +91,41 @@ func (r *userRepo) Create(ctx context.Context, user models.CreateUser) (uuid.UUI
 			last_name,
 			email,
 			role_id,
-			status,
-			created_at, 
-			updated_at
+			avatar,
+			bio
 		)
-		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9);
 	`
 
 	id := uuid.New()
 	_, err := r.db.Exec(
 		ctx,
 		query,
-		id.String(),
+		id,
 		user.Username,
 		user.Password,
 		user.FirstName,
 		user.LastName,
 		user.Email,
 		user.RoleID,
-		"active",
-		time.Now(),
-		time.Now(),
+		user.Avatar,
+		user.Bio,
 	)
 
 	if err != nil {
-		return uuid.Nil, apperror.Wrap(
-			apperror.CodeInternal,
+		if pgerr.IsUniqueViolation(err) {
+			return uuid.Nil, apperror.Conflict(
+				"repository",
+				"CreateUser",
+				"email or username already exists",
+				apperror.ErrAlreadyExists,
+			)
+		}
+
+		return uuid.Nil, apperror.Internal(
 			"repository",
 			"CreateUser",
-			"failed to crete user",
+			"failed to create user",
 			err,
 		)
 	}
@@ -76,20 +142,13 @@ func (r *userRepo) Update(ctx context.Context, updateData models.UpdateUser) (*m
 			username = COALESCE($4, username),
 			email = COALESCE($5, email),
 			password = COALESCE($6, password),
-			updated_at = NOW()
-		WHERE deleted_at IS NULL AND id = $1
-		RETURNING 
-			id,
-			username,
-			first_name, 
-			last_name, 
-			email, 
-			updated_at;
+			avatar = COALESCE($7, avatar),
+			bio = COALESCE($8, bio),
+			updated_at = CURRENT_TIMESTAMP
+		WHERE deleted_at IS NULL AND id = $1;
 	`
 
-	var user models.User
-
-	err := r.db.QueryRow(
+	res, err := r.db.Exec(
 		ctx,
 		query,
 		updateData.ID,
@@ -98,17 +157,20 @@ func (r *userRepo) Update(ctx context.Context, updateData models.UpdateUser) (*m
 		updateData.Username,
 		updateData.Email,
 		updateData.Password,
-	).Scan(
-		&user.ID,
-		&user.Username,
-		&user.FirstName,
-		&user.LastName,
-		&user.Email,
-		&user.UpdatedAt,
+		updateData.Avatar,
+		updateData.Bio,
 	)
 	if err != nil {
-		return nil, apperror.Wrap(
-			apperror.CodeInternal,
+		if pgerr.IsUniqueViolation(err) {
+			return nil, apperror.Conflict(
+				"repository",
+				"UpdateUser",
+				"email or username already exists",
+				apperror.ErrAlreadyExists,
+			)
+		}
+
+		return nil, apperror.Internal(
 			"repository",
 			"UpdateUser",
 			"failed to update user",
@@ -116,7 +178,16 @@ func (r *userRepo) Update(ctx context.Context, updateData models.UpdateUser) (*m
 		)
 	}
 
-	return &user, nil
+	if res.RowsAffected() == 0 {
+		return nil, apperror.NotFound(
+			"repository",
+			"UpdateUser",
+			"user not found",
+			apperror.ErrUserNotFound,
+		)
+	}
+
+	return r.GetByID(ctx, updateData.ID.String())
 }
 
 func (r *userRepo) UpdateStatus(
@@ -127,7 +198,8 @@ func (r *userRepo) UpdateStatus(
 	query := `
 		UPDATE users 
 		SET
-			status = $2
+			status = $2,
+			updated_at = CURRENT_TIMESTAMP
 		WHERE deleted_at IS NULL 
 			AND id = $1
 	`
@@ -139,8 +211,7 @@ func (r *userRepo) UpdateStatus(
 		status,
 	)
 	if err != nil {
-		return apperror.Wrap(
-			apperror.CodeInternal,
+		return apperror.Internal(
 			"repository",
 			"UpdateUserStatus",
 			"failed to update user status",
@@ -149,8 +220,7 @@ func (r *userRepo) UpdateStatus(
 	}
 
 	if res.RowsAffected() == 0 {
-		return apperror.Wrap(
-			apperror.CodeNotFound,
+		return apperror.NotFound(
 			"repository",
 			"UpdateUserStatus",
 			"user not found",
@@ -165,7 +235,8 @@ func (r *userRepo) Delete(ctx context.Context, id string) error {
 	query := `
 		UPDATE users 
 		SET 
-			deleted_at = NOW()
+			deleted_at = CURRENT_TIMESTAMP,
+			updated_at = CURRENT_TIMESTAMP
 		WHERE deleted_at IS NULL 
 			AND id = $1
 	`
@@ -176,8 +247,7 @@ func (r *userRepo) Delete(ctx context.Context, id string) error {
 		id,
 	)
 	if err != nil {
-		return apperror.Wrap(
-			apperror.CodeInternal,
+		return apperror.Internal(
 			"repository",
 			"DeleteUser",
 			"failed to delete user",
@@ -186,8 +256,7 @@ func (r *userRepo) Delete(ctx context.Context, id string) error {
 	}
 
 	if res.RowsAffected() == 0 {
-		return apperror.Wrap(
-			apperror.CodeNotFound,
+		return apperror.NotFound(
 			"repository",
 			"DeleteUser",
 			"user not found",
@@ -206,6 +275,8 @@ func (r *userRepo) GetByID(ctx context.Context, id string) (*models.User, error)
 			u.last_name,
 			u.username,
 			u.email,
+			u.avatar,
+			u.bio,
 			u.role_id,
 			r.name AS role_name,
 			u.status,
@@ -228,6 +299,8 @@ func (r *userRepo) GetByID(ctx context.Context, id string) (*models.User, error)
 		&user.LastName,
 		&user.Username,
 		&user.Email,
+		&user.Avatar,
+		&user.Bio,
 		&user.RoleID,
 		&user.RoleName,
 		&user.Status,
@@ -235,11 +308,71 @@ func (r *userRepo) GetByID(ctx context.Context, id string) (*models.User, error)
 		&user.UpdatedAt,
 	)
 	if err != nil {
-		return nil, apperror.Wrap(
-			apperror.CodeInternal,
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperror.NotFound(
+				"repository",
+				"GetUserByID",
+				"user not found",
+				apperror.ErrUserNotFound,
+			)
+		}
+
+		return nil, apperror.Internal(
 			"repository",
 			"GetUserByID",
 			"failed to get user by id",
+			err,
+		)
+	}
+
+	return &user, nil
+}
+
+func (r *userRepo) GetByUsername(ctx context.Context, username string) (*models.GetByUsername, error) {
+	query := `
+		SELECT 
+			u.id,
+			u.username,
+			u.password,
+			u.status,
+			u.role_id,
+			r.name AS role_name
+		FROM users u 
+		INNER JOIN roles r 
+			ON u.role_id = r.id 
+		WHERE u.username = $1
+			AND u.deleted_at IS NULL;
+	`
+
+	var user models.GetByUsername
+
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		username,
+	).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Password,
+		&user.Status,
+		&user.RoleID,
+		&user.RoleName,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperror.NotFound(
+				"repository",
+				"GetUserByUsername",
+				"user not found",
+				apperror.ErrUserNotFound,
+			)
+		}
+
+		return nil, apperror.Internal(
+			"repository",
+			"GetUserByUsername",
+			"failed to get user by username",
 			err,
 		)
 	}
@@ -258,6 +391,8 @@ func (r *userRepo) GetList(
 			u.last_name,
 			u.username,
 			u.email,
+			u.avatar,
+			u.bio,
 			u.role_id,
 			r.name AS role_name,
 			u.status,
@@ -287,7 +422,9 @@ func (r *userRepo) GetList(
 					u.username ILIKE $%d
 					OR u.first_name ILIKE $%d
 					OR u.last_name ILIKE $%d
+					OR u.email ILIKE $%d
 				)`,
+				argIndex,
 				argIndex,
 				argIndex,
 				argIndex,
@@ -325,8 +462,7 @@ func (r *userRepo) GetList(
 		countQuery += whereClause
 	}
 
-	limit := filter.Limit
-	offset := (filter.Page - 1) * filter.Limit
+	limit, offset := helpers.Pagination(filter.Page, filter.Limit)
 
 	baseQuery += fmt.Sprintf(
 		" ORDER BY u.created_at DESC LIMIT $%d OFFSET $%d",
@@ -339,8 +475,7 @@ func (r *userRepo) GetList(
 
 	rows, err := r.db.Query(ctx, baseQuery, listArgs...)
 	if err != nil {
-		return nil, 0, apperror.Wrap(
-			apperror.CodeInternal,
+		return nil, 0, apperror.Internal(
 			"repository",
 			"GetUserList",
 			"failed to get users",
@@ -360,6 +495,8 @@ func (r *userRepo) GetList(
 			&user.LastName,
 			&user.Username,
 			&user.Email,
+			&user.Avatar,
+			&user.Bio,
 			&user.RoleID,
 			&user.RoleName,
 			&user.Status,
@@ -367,8 +504,7 @@ func (r *userRepo) GetList(
 			&user.UpdatedAt,
 		)
 		if err != nil {
-			return nil, 0, apperror.Wrap(
-				apperror.CodeInternal,
+			return nil, 0, apperror.Internal(
 				"repository",
 				"GetUserList",
 				"failed to scan users",
@@ -380,8 +516,7 @@ func (r *userRepo) GetList(
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, 0, apperror.Wrap(
-			apperror.CodeInternal,
+		return nil, 0, apperror.Internal(
 			"repository",
 			"GetUserList",
 			"failed to read users",
@@ -398,8 +533,7 @@ func (r *userRepo) GetList(
 	).Scan(&total)
 
 	if err != nil {
-		return nil, 0, apperror.Wrap(
-			apperror.CodeInternal,
+		return nil, 0, apperror.Internal(
 			"repository",
 			"GetUserList",
 			"failed to get total count",

@@ -26,11 +26,12 @@ type AppError struct {
 }
 
 var (
-	ErrNotFound     = errors.New("not found")
-	ErrInvalidInput = errors.New("invalid input")
-	ErrUnauthorized = errors.New("unauthorized")
-	ErrUserNotFound = errors.New("user not found")
-	ErrEmailExists  = errors.New("email already exists")
+	ErrNotFound      = errors.New("not found")
+	ErrInvalidInput  = errors.New("invalid input")
+	ErrUnauthorized  = errors.New("unauthorized")
+	ErrUserNotFound  = errors.New("user not found")
+	ErrEmailExists   = errors.New("email already exists")
+	ErrAlreadyExists = errors.New("already exists")
 )
 
 func (e *AppError) Error() string {
@@ -61,7 +62,6 @@ func (e *AppError) HTTPStatus() int {
 	}
 }
 
-
 func Wrap(code ErrorCode, layer, op, message string, err error) error {
 	return &AppError{
 		Code:    code,
@@ -70,6 +70,26 @@ func Wrap(code ErrorCode, layer, op, message string, err error) error {
 		Message: message,
 		Err:     err,
 	}
+}
+
+func NotFound(layer, op, message string, err error) error {
+	return Wrap(CodeNotFound, layer, op, message, err)
+}
+
+func Conflict(layer, op, message string, err error) error {
+	return Wrap(CodeConflict, layer, op, message, err)
+}
+
+func InvalidInput(layer, op, message string, err error) error {
+	return Wrap(CodeInvalidInput, layer, op, message, err)
+}
+
+func Unauthorized(layer, op, message string, err error) error {
+	return Wrap(CodeUnauthorized, layer, op, message, err)
+}
+
+func Internal(layer, op, message string, err error) error {
+	return Wrap(CodeInternal, layer, op, message, err)
 }
 
 func As(err error) (*AppError, bool) {

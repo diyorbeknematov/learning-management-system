@@ -7,9 +7,9 @@ CREATE TABLE payments (
     enrollment_id UUID NOT NULL UNIQUE REFERENCES enrollments(id),
     amount DECIMAL(12, 2) NOT NULL,
     status payment_status NOT NULL DEFAULT 'paid',
-    paid_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    paid_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CHECK (amount >= 0)
 );
@@ -22,7 +22,7 @@ CREATE TABLE instructor_payouts (
     type payout_type NOT NULL,
     value DECIMAL(12, 2) NOT NULL,
     amount DECIMAL(12, 2) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CHECK (value >= 0),
     CHECK (amount >= 0),

@@ -13,9 +13,9 @@ CREATE TABLE quizzes (
     time_limit INT NOT NULL,
     pass_threshold INT NOT NULL,
     max_attempts INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ,
 
     CHECK (
         (course_id IS NOT NULL AND module_id IS NULL)
@@ -39,9 +39,9 @@ CREATE TABLE questions (
     text TEXT NOT NULL,
     type question_type NOT NULL,
     order_number INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE UNIQUE INDEX questions_quiz_order_unique
@@ -53,9 +53,9 @@ CREATE TABLE question_options (
     question_id UUID NOT NULL REFERENCES questions(id),
     option_text TEXT NOT NULL,
     is_correct BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE quiz_attempts (
@@ -64,10 +64,10 @@ CREATE TABLE quiz_attempts (
     quiz_id UUID NOT NULL REFERENCES quizzes(id),
     attempt_number INT NOT NULL,
     score INT,
-    started_at TIMESTAMP NOT NULL,
-    completed_at TIMESTAMP,
+    started_at TIMESTAMPTZ NOT NULL,
+    completed_at TIMESTAMPTZ,
     time_spent INT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (student_id, quiz_id, attempt_number)
 );
@@ -77,7 +77,7 @@ CREATE TABLE attempt_answers (
     attempt_id UUID NOT NULL REFERENCES quiz_attempts(id),
     question_id UUID NOT NULL REFERENCES questions(id),
     option_id UUID NOT NULL REFERENCES question_options(id),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (attempt_id, question_id, option_id)
 );

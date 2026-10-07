@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -62,8 +63,10 @@ type Config struct {
 }
 
 func Load() *Config {
-	if err := godotenv.Load("../../../.env"); err != nil {
+	if path, ok := findEnvFile(); !ok {
 		log.Println("warning: .env file not found")
+	} else if err := godotenv.Load(path); err != nil {
+		log.Println("warning: .env file not loaded:", err)
 	}
 
 	return &Config{
@@ -108,6 +111,30 @@ func Load() *Config {
 
 		AccessTokenTTL:  cast.ToDuration(coalesce("ACCESS_TOKEN_TTL", "15m")),
 		RefreshTokenTTL: cast.ToDuration(coalesce("REFRESH_TOKEN_TTL", "168h")),
+	}
+}
+
+// findEnvFile looks for .env in the working directory and then in each parent
+// directory, so it is found whether the app or a test in a subfolder runs.
+func findEnvFile() (string, bool) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", false
+	}
+
+	for {
+		path := filepath.Join(dir, ".env")
+
+		if _, err := os.Stat(path); err == nil {
+			return path, true
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", false
+		}
+
+		dir = parent
 	}
 }
 

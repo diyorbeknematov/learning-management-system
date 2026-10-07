@@ -9,9 +9,9 @@ CREATE TABLE enrollments (
     course_id UUID NOT NULL REFERENCES courses(id),
     student_id UUID NOT NULL REFERENCES users(id),
     status enrollment_status NOT NULL DEFAULT 'active',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE UNIQUE INDEX enrollments_student_course_unique
@@ -23,9 +23,9 @@ CREATE TABLE lesson_progress (
     student_id UUID NOT NULL REFERENCES users(id),
     lesson_id UUID NOT NULL REFERENCES lessons(id),
     completed BOOLEAN NOT NULL DEFAULT FALSE,
-    completed_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (student_id, lesson_id)
 );

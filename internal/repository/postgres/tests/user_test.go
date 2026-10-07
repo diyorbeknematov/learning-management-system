@@ -1,11 +1,14 @@
-package postgres_test
+package tests
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/diyorbeknematov/lms/internal/models"
+	"github.com/diyorbeknematov/lms/internal/repository"
+	"github.com/diyorbeknematov/lms/pkg/apperror"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +36,7 @@ func createTestUser(t *testing.T, tc *TestContext) uuid.UUID {
 		Password:  "password123",
 	}
 
-	id, err := tc.Repo.Create(ctx, user)
+	id, err := tc.Repo.User.Create(ctx, user)
 
 	require.NoError(t, err)
 	require.NotEqual(t, uuid.Nil, id)
@@ -78,7 +81,7 @@ func TestUserRepo_Create(t *testing.T) {
 		Password:  "password123",
 	}
 
-	id, err := tc.Repo.Create(ctx, user)
+	id, err := tc.Repo.User.Create(ctx, user)
 
 	require.NoError(t, err)
 	require.NotEqual(t, uuid.Nil, id)
@@ -125,7 +128,7 @@ func TestUserRepo_Update(t *testing.T) {
 		Password:  &password,
 	}
 
-	updatedUser, err := tc.Repo.Update(ctx, updateData)
+	updatedUser, err := tc.Repo.User.Update(ctx, updateData)
 
 	require.NoError(t, err)
 	require.NotNil(t, updatedUser)
@@ -148,7 +151,7 @@ func TestUserRepo_UpdateStatus(t *testing.T) {
 		deleteTestUser(t, tc, id)
 	})
 
-	err := tc.Repo.UpdateStatus(
+	err := tc.Repo.User.UpdateStatus(
 		ctx,
 		id.String(),
 		"blocked",
@@ -179,7 +182,7 @@ func TestUserRepo_GetByID(t *testing.T) {
 		deleteTestUser(t, tc, id)
 	})
 
-	user, err := tc.Repo.GetByID(ctx, id.String())
+	user, err := tc.Repo.User.GetByID(ctx, id.String())
 
 	require.NoError(t, err)
 	require.NotNil(t, user)
@@ -207,7 +210,7 @@ func TestUserRepo_GetList(t *testing.T) {
 		Limit: 10,
 	}
 
-	users, total, err := tc.Repo.GetList(ctx, filter)
+	users, total, err := tc.Repo.User.GetList(ctx, filter)
 
 	require.NoError(t, err)
 	require.NotNil(t, users)
@@ -238,7 +241,7 @@ func TestUserRepo_Delete(t *testing.T) {
 
 	id := createTestUser(t, tc)
 
-	err := tc.Repo.Delete(ctx, id.String())
+	err := tc.Repo.User.Delete(ctx, id.String())
 
 	require.NoError(t, err)
 
@@ -254,3 +257,98 @@ func TestUserRepo_Delete(t *testing.T) {
 	require.NotNil(t, deletedAt)
 }
 
+func TestUserRepo_Create_DuplicateEmail(t *testing.T) {
+	tc := setupTest(t)
+
+	ctx := context.Background()
+
+	id := createTestUser(t, tc)
+
+	t.Cleanup(func() {
+		deleteTestUser(t, tc, id)
+	})
+
+	existing, err := tc.Repo.User.GetByID(ctx, id.String())
+	require.NoError(t, err)
+
+	_, err = tc.Repo.User.Create(ctx, models.CreateUser{
+		RoleID:    existing.RoleID.String(),
+		FirstName: "Dup",
+		LastName:  "User",
+		Username:  "dup_" + uuid.NewString(),
+		Email:     existing.Email,
+		Password:  "password123",
+	})
+
+	appErr, ok := apperror.As(err)
+	require.True(t, ok)
+	require.Equal(t, apperror.CodeConflict, appErr.Code)
+}
+
+func TestUserRepo_AvatarAndBio(t *testing.T) {
+	tc := setupTest(t)
+
+	ctx := context.Background()
+
+	id := createTestUser(t, tc)
+
+	t.Cleanup(func() {
+		deleteTestUser(t, tc, id)
+	})
+
+	avatar := "avatars/me.png"
+	bio := "Go developer"
+
+	updated, err := tc.Repo.User.Update(ctx, models.UpdateUser{
+		ID:     id,
+		Avatar: &avatar,
+		Bio:    &bio,
+	})
+	require.NoError(t, err)
+	require.Equal(t, &avatar, updated.Avatar)
+	require.Equal(t, &bio, updated.Bio)
+	require.Equal(t, "Student", updated.RoleName)
+}
+
+func TestUserRepo_GetByUsername_NotFound(t *testing.T) {
+	tc := setupTest(t)
+
+	_, err := tc.Repo.User.GetByUsername(context.Background(), "no_such_"+uuid.NewString())
+
+	appErr, ok := apperror.As(err)
+	require.True(t, ok)
+	require.Equal(t, apperror.CodeNotFound, appErr.Code)
+}
+
+func TestRepository_WithTx_RollbackOnError(t *testing.T) {
+	tc := setupTest(t)
+
+	ctx := context.Background()
+
+	var roleID uuid.UUID
+	require.NoError(t, tc.DB.Pool.QueryRow(
+		ctx,
+		`SELECT id FROM roles WHERE name = 'Student'`,
+	).Scan(&roleID))
+
+	username := "tx_" + uuid.NewString()
+
+	err := tc.Repo.WithTx(ctx, func(txRepo *repository.Repository) error {
+		_, err := txRepo.User.Create(ctx, models.CreateUser{
+			RoleID:    roleID.String(),
+			FirstName: "Tx",
+			LastName:  "User",
+			Username:  username,
+			Email:     uuid.NewString() + "@example.com",
+			Password:  "password123",
+		})
+		require.NoError(t, err)
+
+		return errors.New("force rollback")
+	})
+	require.Error(t, err)
+
+	exists, err := tc.Repo.User.ExistsByUsername(ctx, username)
+	require.NoError(t, err)
+	require.False(t, exists)
+}
