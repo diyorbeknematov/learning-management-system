@@ -122,7 +122,7 @@ test.describe('the instructor builds the course', () => {
     await teacher.getByRole('button', { name: 'Add a module' }).click()
     await teacher.getByLabel('Title').fill('Basics')
     await teacher.getByRole('button', { name: 'Save' }).click()
-    await expect(teacher.getByText('1. Basics')).toBeVisible()
+    await expect(teacher.getByRole('heading', { name: 'Basics' })).toBeVisible()
 
     await teacher.getByRole('button', { name: 'Add a lesson' }).click()
     await teacher.getByLabel('Title').fill('Hello world')
@@ -134,7 +134,7 @@ test.describe('the instructor builds the course', () => {
     await teacher.getByRole('button', { name: 'Add a module' }).click()
     await teacher.getByLabel('Title').fill('Advanced')
     await teacher.getByRole('button', { name: 'Save' }).click()
-    await expect(teacher.getByText('2. Advanced')).toBeVisible()
+    await expect(teacher.getByRole('heading', { name: 'Advanced' })).toBeVisible()
 
     await teacher.getByRole('button', { name: 'Add a lesson' }).last().click()
     await teacher.getByLabel('Title').fill('Deep dive')
